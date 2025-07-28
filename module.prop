@@ -1,9 +1,9 @@
 id=integrity_box
-name=Integrity Box
-version=v7
-versionCode=700
+name=Integrity Box 📦
+version=v13
+versionCode=1300
 author=𝗠𝗘𝗢𝗪𝗻𝗮 💅 || tg@MeowDump
 description=This module provides real, working keyboxes for free with no hidden charges or scams, along with several powerful features. Smash the WebUI button to discover more!
-updateJson=https://raw.githubusercontent.com/MeowDump/Integrity-Box/main/release.json
+updateJson=https://raw.githubusercontent.com/MeowRedirect/MeowRedirect/main/ib.json
 support=https://t.me/MeowDump
-banner=https://raw.githubusercontent.com/MeowDump/Integrity-Box/refs/heads/main/DUMP/paw3.png
+banner=.mona

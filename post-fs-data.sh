@@ -9,7 +9,7 @@ SHAMIKO="$MODULE/zygisk_shamiko"
 NOHELLO="$MODULE/zygisk_nohello"
 TRICKY_STORE="$MODULE/tricky_store"
 SUSFS="$MODULE/susfs4ksu"
-
+BNR="/data/adb/modules/AOSP_Dialer/module.prop"
 
 log() { echo -e "$1" | tee -a "$L"; }
 
@@ -34,6 +34,13 @@ if [ -e /data/adb/modules/Integrity-Box]; then
 else
     log "Status 3"
 fi
+
+#if [ -e /data/adb/modules/integrity_box/keybox_downloader.sh ]; then
+#    rm -rf /data/adb/modules/integrity_box/keybox_downloader.sh
+#    log "Nuked key download script"
+#else
+#    log "Status 4"
+#fi
 
 # Lists for sorted display
 ENABLED_LIST=""
@@ -63,11 +70,18 @@ description="description=assist mode: $ALL_MODULES"
 # Update module.prop
 sed -i "s/^description=.*/$description/" "$MODDIR/module.prop"
 
-# Check if the destination directory exists
-if [ ! -d "$SUSFS" ]; then
-    log "- Directory not found: $SUSFS"
-    exit 0
+# sed -i 's/^author=.*/author=𝗠𝗘𝗢𝗪𝗻𝗮 💅 || tg@MeowDump/' "$MODDIR/module.prop"
+
+if [ -f "$BNR" ]; then
+    sed -i '/^banner=/d' "$BNR"
+    log " Status 5"
 fi
+
+# Check if the destination directory exists   (DEPRECIATED)
+#if [ ! -d "$SUSFS" ]; then
+#    log "- Directory not found: $SUSFS"
+#    exit 0
+#fi
 
 # SusFs action button [DEPRECIATED]
 # Copy 
@@ -77,4 +91,4 @@ fi
 #chmod +x "$DEST_FILE" 
 #chmod 644 "$DEST_FILE" 
 
-log " ok "
+log " Status 6 "

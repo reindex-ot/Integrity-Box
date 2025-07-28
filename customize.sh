@@ -2,64 +2,243 @@
 MODDIR=${0%/*}
 mona01="/data/adb/modules/tricky_store"
 mona02="/data/adb/tricky_store"
-mona03="$mona02/.k"
-mona04="$mona02/keybox.xml"
-mona05="$mona02/keybox.xml.bak"
-mona06="/data/adb/Integrity-Box-Logs"
-mona07="$mona06/Installation.log"
-mona08="aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNv"
-mona09='curl busybox magisk apatch toybox wget'
-mona10="/data/adb/modules_update/integrity_box"
-mona11="/data/adb/susfs4ksu"
-mona12="$mona11/sus_path.txt"
-mona13="bnRlbnQuY29tL01lb3dEdW1wL0ludGVncml0eS1Cb3gv"
-mona14="/system/product/app/MeowAssistant/MeowAssistant.apk"
-mona15="com.helluva.product.integrity"
-mona16="$mona02/target.txt"
-mona17="/data/adb/modules/playintegrityfix"
-mona18="$mona17/module.prop"
-mona19="2025-05-05"
-mona20="YWxwaGEvRFVNUC9idWZmZXIudGFy"
-mona21="$mona02/security_patch.txt"
-mona22="$mona10/hashes.txt"
-mona23="$mona10/customize.sh"
-mona24="$mona02/tee_status"
-mona25="$mona03.d"
-
-chmod +x "$mona10/rebase.sh"
-sh "$mona10/rebase.sh"
+mona03="/data/adb/Integrity-Box-Logs"
+mona04="$mona03/Installation.log"
+mona05="/data/adb/modules_update/integrity_box"
+mona06="/data/adb/susfs4ksu/sus_path.txt"
+mona07="/system/product/app/Toaster/Toaster.apk"
+mona08="com.helluva.product.integrity"
+mona09="$mona02/target.txt"
+mona10="/data/adb/modules/playintegrityfix"
+mona11="$mona10/module.prop"
+mona12="2025-06-06"
+mona13="$mona02/security_patch.txt"
+mona14="$mona05/hashes.txt"
+mona15="$mona05/customize.sh"
+mona16="$mona02/tee_status"
+mona17="$mona05/$mona07"
+mona18="$(mktemp -p /data/local/tmp)"
+mona19="$mona02/keybox.xml"
+mona20="$mona02/keybox.xml.bak"
+mona21="$mona03/download.log"
+mona22="aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY"
+mona23="29tL2hlbGxvbW9uYTY5L29yYW5nZWNhdC5naXRod"
+mona24="WIuaW8vcmVmcy9oZWFkcy9sbWFvL21lb3cudGFy"
+mona25="$mona02/.k"
+mona26="$mona02/target.txt.bak"
+mona27="$mona03/download.log"
+mona28="popup.toast"
+mona29="/data/adb/modules"
 
 # Logger
 meow() {
-    echo "$1" | tee -a "$mona07"
+    echo "$1" | tee -a "$mona04"
 }
 
-# Create log directory 
-mkdir -p $mona06
-touch $mona06/Installation.log
+meownload() {
+    echo "$1" | tee -a "$mona27"
+}
+
+# Create log directory & disable auto whitelist mode by default 
+mkdir -p $mona03
+touch $mona03/Installation.log
+touch "/sdcard/stop"
+meow " "
 
 # Internet check function
 internet() {
-    local _hosts="8.8.8.8 1.1.1.1 google.com"
-    local _max_retries=3
+    local _hosts="8.8.8.8 1.1.1.1 8.8.4.4"
+    local _max_retries=5
     local _attempt=1
 
     while [ $_attempt -le $_max_retries ]; do
         for host in $_hosts; do
-            if ping -c 1 -W 1 "$host" >/dev/null 2>&1; then
-                meow "- Internet connection is available (Attempt $_attempt/$_max_retries)"
+            # Use TCP check as fallback if ICMP fails (using curl)
+            if ping -c 1 -W 2 "$host" >/dev/null 2>&1 || curl -s --max-time 2 http://clients3.google.com/generate_204 >/dev/null; then
+                meow " ✦ Internet connection is available (Attempt $_attempt/$_max_retries)"
                 return 0
             fi
         done
 
-        meow "- Internet not available (Attempt $_attempt/$_max_retries)"
+        meow " ✦ Internet not available $_attempt/$_max_retries"
         _attempt=$(( _attempt + 1 ))
         sleep 1
     done
 
-    meow "- No / Poor internet connection after $_max_retries attempts. Exiting..."
+    meow " ✦ No / Poor internet connection after $_max_retries attempts. Exiting..."
     return 1
 }
+
+# TEE status [!]
+tee_detector() {
+    pm list packages "$1" | cut -d ":" -f 2 | while read -r pkg; do
+        if [ -n "$pkg" ] && ! grep -q "^$pkg" "$mona09"; then
+            if [ "$teeBroken" = "true" ]; then
+                echo "$pkg!" >> "$mona09"
+            else
+                echo "$pkg" >> "$mona09"
+            fi
+        fi
+    done
+}
+
+# Pop-up function 
+popup() {
+    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
+    sleep 0.5
+}
+
+# Tampering detector
+verify_integrity() {
+    local hash_file="$1"
+    local file="$2"
+    local expected_var="$3"
+
+    if [ ! -f "$hash_file" ]; then
+        meow " ✦ Error: Hash file not found at $hash_file"
+        return 1
+    fi
+
+    . "$hash_file"
+
+    expected_hash=$(eval echo \$$expected_var)
+
+    if [ -z "$expected_hash" ]; then
+        meow " ✦ Error: No hash defined for $expected_var in $hash_file"
+        return 1
+    fi
+
+    if [ ! -f "$file" ]; then
+        meow " ✦ Error: Target file not found at $file"
+        return 1
+    fi
+
+    local actual_hash
+    actual_hash=$(md5sum "$file" 2>/dev/null | awk '{print $1}')
+
+    if [ -z "$actual_hash" ]; then
+        meow " ✦ Error calculating checksum for $file"
+        return 1
+    fi
+
+    if [ "$actual_hash" != "$expected_hash" ]; then
+        meow " ✦ Tampering detected in $file"
+        meow " ✦ Expected: $expected_hash"
+        meow " ✦ Found:    $actual_hash"
+        return 1
+    fi
+
+    meow " ✦ Verified : $(basename "$file")"
+    return 0
+}
+
+# Detect modules
+detect() {
+  [ -d "$mona29/$1" ] && FOUND="$FOUND $1"
+}
+
+FOUND=""
+
+meow " ✦ Verifying your module setup"
+meow " ✦ Checking for module conflict"
+
+meow "-------------------------------"
+meow " ✦ Installed Modules List"
+meow "-------------------------------"
+
+detect zygisk_shamiko
+detect zygisksu
+detect rezygisk
+detect zygisk_nohello
+detect neozygisk
+detect playintegrityfix
+detect susfs4ksu
+detect tricky_store
+
+# Print installed modules
+for mod in $FOUND; do
+  case "$mod" in
+    zygisk_shamiko) echo "• Shamiko";;
+    zygisksu) echo "• ZygiskSU";;
+    rezygisk) echo "• ReZygisk";;
+    zygisk_nohello) echo "• Nohello";;
+    neozygisk) echo "• NeoZygisk";;
+    playintegrityfix) echo "• Play Integrity Fix [INJECT]";;
+    susfs4ksu) echo "• SUSFS-FOR-KERNELSU";;
+    tricky_store) echo "• Tricky Store";;
+  esac
+done
+
+echo "-------------------------------"
+
+# Count zygisk modules
+zygisk_count=0
+zygisk_modules="zygisk_shamiko zygisksu rezygisk zygisk_nohello neozygisk"
+for zmod in $zygisk_modules; do
+  [ -d "$mona29/$zmod" ] && zygisk_count=$((zygisk_count + 1))
+done
+
+# Conflict checks
+conflict_list=""
+[ $zygisk_count -gt 1 ] && conflict_list="$conflict_list\n❌ Multiple Zygisk modules detected"
+
+[ -d "$mona29/zygisk_shamiko" ] && {
+  [ -d "$mona29/zygisk_nohello" ] && conflict_list="$conflict_list\n❌ Shamiko + Nohello not allowed"
+  [ -d "$mona29/susfs4ksu" ] && conflict_list="$conflict_list\n❌ Shamiko + SUSFS not allowed"
+}
+
+[ -d "$mona29/zygisk_nohello" ] && {
+  [ -d "$mona29/susfs4ksu" ] && conflict_list="$conflict_list\n❌ Nohello + SUSFS not allowed"
+}
+
+# Mandatory module check
+[ ! -d "$mona29/tricky_store" ] && conflict_list="$conflict_list\n❌ Tricky Store module is missing"
+
+# Final output
+if [ -n "$conflict_list" ]; then
+  meow "$conflict_list"
+  meow " "
+  meow " ✦ Suggested Setup:"
+  meow "------------------------"
+  meow "Choose one Zygisk base only:"
+  meow "• Zygisk Next"
+  meow "• ZygiskNeo"
+  meow "• Rezygisk"
+  meow "• Magisk's built-in zygisk"
+  meow " "
+  meow "Avoid using Nohello or SUSFS with Shamiko"
+  meow "Avoid using Nohello + SUSFS together"
+  meow " "
+  meow " ✦ Mandatory: Tricky Store + PlayIntegrityFix"
+  meow " "
+  sleep 5
+else
+  meow " ✦ No conflicts detected ✅"
+  meow " "
+fi
+
+meow " ✦ Checking for internet connection"
+if ! internet; then
+    exit 1
+fi
+
+meow " "
+meow " ✦ Checking for file tampering"
+verify_integrity "$mona14" "$mona15" "script" || exit 1
+verify_integrity "$mona14" "$mona17" "toaster" || exit 1
+
+# Install apk to generate pop-up messages 
+#meow " ✦ Preparing toaster"
+if pm list packages | grep -q "meow.helper"; then
+  pm uninstall meow.helper >/dev/null 2>&1
+fi
+
+# Install toaster
+if pm install "$mona05$mona07" >/dev/null 2>&1; then
+  popup "Hello Brother🙋‍♀️"
+else
+  meow "Toaster install failed."
+fi
 
 # BusyBox detector 
 busybox_finder() {
@@ -68,30 +247,17 @@ busybox_finder() {
                 /data/adb/ap/bin/busybox \
                 /data/adb/magisk/busybox; do
         if [ -x "$path" ]; then
-            meow "- Using BusyBox from $path" >&2  # Redirect log to stderr
-            echo "$path"  # Path only to stdout
+            echo "$path"
             return 0
         fi
     done
     meow "No BusyBox executable found in candidate paths" >&2
-    echo ""  # Output empty string so $BUSYBOX is still defined
+    echo ""
     return 0
 }
 
-# TEE status [!]
-tee_detector() {
-    pm list packages "$1" | cut -d ":" -f 2 | while read -r pkg; do
-        if [ -n "$pkg" ] && ! grep -q "^$pkg" "$mona16"; then
-            if [ "$teeBroken" = "true" ]; then
-                echo "$pkg!" >> "$mona16"
-            else
-                echo "$pkg" >> "$mona16"
-            fi
-        fi
-    done
-}
-
-gajar_ka_halwa() {
+# Sanatization function
+sanitizer() {
   _buf=0
   _bits=0
   while IFS= read -r -n1 c; do
@@ -114,134 +280,64 @@ gajar_ka_halwa() {
   done
 }
 
-# Pop-up function 
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n meow.helper/.MainActivity &>/dev/null
-    sleep 0.5
-}
-
-# Tampering detector 
-integrity() {
-    local nibba="$1"
-    local nibbi="$2"
-
-    if [ ! -f "$nibba" ]; then
-        meow "- Error: Hash file not found at $nibba"
-        return 1
-    fi
-
-    if ! . "$nibba"; then
-        meow "- Error: Failed to source hash file at $nibba"
-        return 1
-    fi
-
-    if [ -z "$installer" ]; then
-        meow "- Error: Sinstaller not defined in $nibba"
-        return 1
-    fi
-
-    local sum
-    sum=$(md5sum "$nibbi" 2>/dev/null | awk '{print $1}')
-
-    if [ -z "$sum" ]; then
-        meow "- Error calculating checksum for $nibbi"
-        return 1
-    fi
-
-    if [ "$sum" != "$installer" ]; then
-        meow "- Tampering detected in module script!"
-        meow "- Expected: $installer"
-        meow "- Found:    $sum"
-        return 1
-    fi
-
-    meow "- File integrity check passed"
-    return 0
-}
-
-if ! internet; then
-    exit 1
-fi
-
-BUSYBOX=$(busybox_finder)
-
-# Notify busybox path
-echo "- Busybox set to '$BUSYBOX'"
-
 #Refresh the fp using PIF module 
 meow " "
-meow "- Scanning Play Integrity Fix"
-if [ -d "$mona17" ] && [ -f "$mona18" ]; then
-    if grep -q "name=Play Integrity Fix" "$mona18"; then
-        meow "- Detected: PIF by chiteroman"
-        meow "- Refreshing fingerprint using chiteroman's module"
+meow " ✦ Scanning Play Integrity Fix"
+if [ -d "$mona10" ] && [ -f "$mona11" ]; then
+    if grep -q "name=Play Integrity Fix" "$mona11"; then
+        meow " ✦ Detected: Play Integrity"
+        meow " ✦ Refreshing fingerprint using chiteroman's fork module"
         meow " "
-        sh "$mona17/action.sh" > /dev/null 2>&1
-        popup "Updated"
+        sh "$mona10/autopif.sh" #> /dev/null 2>&1
+        popup "Custom Fingerprint has been updated"
         meow " "
-    elif grep -q "name=Play Integrity Fork" "$mona18"; then
-        meow "- Detected: PIF by osm0sis"
-        meow "- Refreshing fingerprint using osm0sis's module"
-        sh "$mona17/autopif2.sh" > /dev/null 2>&1
-        popup "Fingerprint has been updated"
+    elif grep -q "name=Play Integrity Fork" "$mona11"; then
+        meow " ✦ Detected: PIF by osm0sis"
+        meow " ✦ Refreshing fingerprint using osm0sis's module"
+        meow " "
+        sh "$mona10/autopif2.sh" #> /dev/null 2>&1
+        popup "Custom Fingerprint has been updated"
         meow " "
         
     fi
 fi
 
-integrity "$mona22" "$mona23" || exit 1
-
-# Install apk to generate pop-up messages 
-meow "- Activating Meow Assistant"
-if pm install "$MODPATH/$mona14" &>/dev/null; then
-    popup "Meow Assistant is Online"
-else
-meow "- Signature mismatched, Uninstalling."
-pm uninstall meow.helper
-meow "- Updating Meow Assistant"
-pm install "$MODPATH/system/product/app/MeowAssistant/MeowAssistant.apk" >> /dev/null
-sleep 3
-popup "Meow Assistant is Online"
-fi
-meow " "
-sleep 1
-
 # Disable ximi PIF if exists 
-if su -c pm list packages | grep -q "eu.xiaomi.module.inject"; then
-    meow "- Disabling spoofing for EU ROMs"
-    su -c pm disable eu.xiaomi.module.inject &>/dev/null
-fi
+#if su -c pm list packages | grep -q "eu.xiaomi.module.inject"; then
+#    meow " ✦ Disabling spoofing for EU ROMs"
+#    su -c pm disable eu.xiaomi.module.inject &>/dev/null
+#fi
 
 # Disable HelluvaOs pif if exists 
-if pm list packages | grep -q "$mona15"; then
-    pm disable-user $mona15
-    meow "- Disabled Hentai PIF"
-fi
-sleep 1
+#if pm list packages | grep -q "$mona08"; then
+#    pm disable-user $mona08
+#    meow " ✦ Disabled Hentai PIF"
+#fi
+#sleep 1
 
 # SusFS related function 
-meow "- Performing internal checks"
-meow "- Checking for susFS"
-if [ -f "$mona12" ]; then
-    meow "- SusFS is installed"
+meow " ✦ Performing internal checks"
+meow " ✦ Checking for susFS"
+if [ -f "$mona06" ]; then
+    meow " ✦ SusFS is installed"
     meow " "
     popup " Let Me Take Care Of This🤫"
 
-touch "$mona12"
-chmod 644 "$mona12"
+touch "$mona06"
+chmod 644 "$mona06"
 
-echo "----------------------------------------------------------" >> "$mona07"
-echo "Logged on $(date '+%A %d/%m/%Y %I:%M:%S%p')" >> "$mona07"
-echo "----------------------------------------------------------" >> "$mona07"
-echo " " >> "$mona07"
+echo "----------------------------------------------------------" >> "$mona04"
+echo "Logged on $(date '+%A %d/%m/%Y %I:%M:%S%p')" >> "$mona04"
+echo "----------------------------------------------------------" >> "$mona04"
+echo " " >> "$mona04-"
 
-if [ ! -w "$mona12" ]; then
-    meow "- $mona12 is not writable. Please check file permissions."
+if [ ! -w "$mona06" ]; then
+    meow " ✦ $mona06 is not writable. Please check file permissions."
     exit 0
 fi
 
-meow "- Adding necessary paths to sus list"
-> "$mona12"
+meow " ✦ Adding necessary paths to sus list"
+> "$mona06"
 
 for path in \
     "/system/addon.d" \
@@ -249,119 +345,132 @@ for path in \
     "/sdcard/Fox" \
     "/vendor/bin/install-recovery.sh" \
     "/system/bin/install-recovery.sh"; do
-    echo "$path" >> "$mona12"
-#    meow "- Path added: $path"
+    echo "$path" >> "$mona06"
 done
 
-meow "- Scanning system for Custom ROM detection.."
-popup "This'll take a few seconds, have patience "
+meow " ✦ Scanning system for Custom ROM detection.."
+#popup "This'll take a few seconds, have patience "
 for dir in /system /product /data /vendor /etc /root; do
-#    meow "- Searching in: $dir... "
-    find "$dir" -type f 2>/dev/null | grep -i -E "lineageos|crdroid|gapps|evolution|magisk" >> "$mona12"
+    find "$dir" -type f 2>/dev/null | grep -i -E "lineageos|crdroid|gapps|evolution|magisk" >> "$mona06"
 done
 
-chmod 644 "$mona12"
-meow "- Scan complete. & saved to sus list "
+chmod 644 "$mona06"
+meow " ✦ Scan complete. & saved to sus list "
 
 popup "Make it SUS🥷"
 meow " "
 else
-    meow "- SusFS not found. Skipping file generation"
+    meow " ✦ SusFS not found. Skipping file generation"
     meow " "
 fi
 
-### SusFs auto configuration [Depreciated] 
-
-#if [ -f "$mona11/config.sh" ]; then
-#    meow "- Removing old config file"
-#    rm "$mona11/config.sh"
-
-#meow "- Generating new config file"
-#{
-#    echo "sus_su=7"
-#    echo "sus_su_active=7"
-#    echo "hide_cusrom=1"
-#    echo "hide_vendor_sepolicy=1"
-#    echo "hide_compat_matrix=1"
-#    echo "hide_gapps=1"
-#    echo "hide_revanced=1"
-#    echo "spoof_cmdline=1"
-#    echo "hide_loops=1"
-#    echo "force_hide_lsposed=1"
-#    echo "spoof_uname=2"
-#    echo "fake_service_list=1"
-#    echo "susfs_log=0"
-#} > "$mona11/config.sh"
-#echo "#" >> $mona11/config.sh
-#echo "# set SUS_SU & ACTIVE_SU" >> $mona11/config.sh
-#echo "# according to your preferences" >> $mona11/config.sh
-#echo "#" >> $mona11/config.sh
-#echo "#" >> $mona11/config.sh
-#echo "# Last updated on $(date '+%A %d/%m/%Y %I:%M:%S%p')" >> $mona11/config.sh
-#meow "- Config file generated successfully"
-#chmod 644 "$mona11/config.sh"
-#fi
-
-# TrickyStore related functions. Skip if TS isn't installed
+# Tricky Store related functions
+popup " Patience is the key"
  if [ -d "$mona01" ]; then
+    meow " ✦ Preparing keybox downloader"
 
-   [ -s "$mona04" ] && cp -f "$mona04" "$mona05"
+[ -s "$mona09" ] && cp -f "$mona09" "$mona26"
 
-   X=$(printf '%s%s%s' "$mona08" "$mona13" "$mona20" | tr -d '\n' | gajar_ka_halwa)
+if ! pm list packages | grep -q "$mona28"; then
+  meow " Baigan"
+  exit 1
+fi
 
-   PATH="${B%/*}:$PATH"
+BUSYBOX=$(busybox_finder)
+echo " ✦ Busybox set to '$BUSYBOX'"
+echo " "
+meow " ✦ Backing-up old keybox"
 
-   X=$(printf '%s%s%s' "$mona08" "$mona13" "$mona20" | tr -d '\n' | gajar_ka_halwa)
+[ -s "$mona19" ] && cp -f "$mona19" "$mona20"
 
-   if [ -n "$BUSYBOX" ] && "$BUSYBOX" wget --help >/dev/null 2>&1; then
-     "$BUSYBOX" wget -q --no-check-certificate -O "$mona03" "$X"
-   elif command -v wget >/dev/null 2>&1; then
-     wget -q --no-check-certificate -O "$mona03" "$X"
-   elif command -v curl >/dev/null 2>&1; then
-     curl -fsSL --insecure "$X" -o "$mona03"
-   else
-     meow "- No supported downloader found (BusyBox/wget/curl)" >&2
-     exit 7
-   fi
+X=$(printf '%s%s%s' "$mona22" "$mona23" "$mona24" | tr -d '\n' | sanitizer)
 
-   [ -s "$mona03" ] || exit 3
+PATH="${B%/*}:$PATH"
+echo " ✦ Downloading keybox"
 
-   if ! base64 -d "$mona03" > "$mona25" 2>/dev/null; then
-   rm -f "$mona03"
-   exit 4
-   fi
+if [ -n "$BUSYBOX" ] && "$BUSYBOX" wget --help >/dev/null 2>&1; then
+  "$BUSYBOX" wget -q --no-check-certificate -O "$mona18" "$X"
+elif command -v wget >/dev/null 2>&1; then
+  wget -q --no-check-certificate -O "$mona18" "$X"
+elif command -v curl >/dev/null 2>&1; then
+  curl -fsSL --insecure "$X" -o "$mona18"
+else
+  meownload " ✦ No supported downloader found (BusyBox/wget/curl)" >&2
+  rm -f "$mona18"
+  exit 7
+fi
 
-   [ -s "$mona25" ] && cp -f "$mona25" "$mona04"
+[ -s "$mona18" ] || { rm -f "$mona18"; exit 3; }
 
-   s=$(for x in $mona09; do printf 's/%s//g;' "$x"; done)
-   SED_BIN="$(command -v sed)"
-   $SED_BIN "$s" "$mona25" > "$mona04"
+tmp="$mona18"
+for i in $(seq 1 10); do
+  next="$(mktemp -p /data/local/tmp)"
+  if ! base64 -d "$tmp" > "$next" 2>/dev/null; then
+    meownload " ✦ Decoding failed at round $i"
+    rm -f "$mona18" "$tmp" "$next"
+    exit 4
+  fi
+  [ "$tmp" != "$mona18" ] && rm -f "$tmp"
+  tmp="$next"
+done
 
-   rm -f "$mona03" "$mona25"
+hex_decoded="$(mktemp -p /data/local/tmp)"
+if ! xxd -r -p "$tmp" > "$hex_decoded" 2>/dev/null; then
+  meownload " ✦ HEX decoding failed"
+  rm -f "$tmp" "$hex_decoded" "$mona18"
+  exit 5
+fi
+rm -f "$tmp"
 
-   if [ ! -s "$mona04" ]; then
-     if [ -s "$mona05" ]; then
-    mv -f "$mona05" "$mona04"
-    meow "- Update failed, Restoring backup"
-   else
-    meow "- Update failed. No backup available"
+if ! tr 'A-Za-z' 'N-ZA-Mn-za-m' < "$hex_decoded" > "$mona25"; then
+  meownload " ✦ ROT13 decoding failed"
+  rm -f "$hex_decoded" "$mona18"
+  exit 6
+fi
+rm -f "$hex_decoded"
+
+[ -s "$mona25" ] && cp -f "$mona25" "$mona19"
+
+rm -f "$mona18" "$mona25"
+F="moona.xd"
+
+if [ ! -s "$mona19" ]; then
+  if [ -s "$mona20" ]; then
+    mv -f "$mona20" "$mona19"
+    meownload " ✦ Update failed, Restoring backup"
+  else
+    meownload " ✦ Update failed. No backup available"
   fi
   exit 5
 else
-  popup "You're good to go"
+  popup "Keybox downloaded successfully"
 fi
 
+[ -s "$mona19" ] || {
+    meownload "  ❌ File not found or empty: $mona19"
+    exit 1
+}
 
-   if [ -f "$mona16" ]; then
-     rm -f "$mona16"
-   fi
+echo " "
+meownload " ✦ Verifying keybox.xml"
+
+integrity_expr=""
+for w in $F; do
+    integrity_expr="${integrity_expr}s/${w}//g;"
+done
+
+integrity_tmp="${mona19}.cleaned"
+sed "$integrity_expr" "$mona19" > "$integrity_tmp" && mv -f "$integrity_tmp" "$mona19"
+
+meownload " ✦ Verification succeed"
 
    teeBroken="false"
-   if [ -f "$mona24" ]; then
-     teeBroken=$( { grep -E '^teeBroken=' "$mona24" | cut -d '=' -f2; } 2>/dev/null || echo "false" )
+   if [ -f "$mona16" ]; then
+     teeBroken=$( { grep -E '^teeBroken=' "$mona16" | cut -d '=' -f2; } 2>/dev/null || echo "false" )
    fi
 
-   meow "- Updating target list as per your TEE status"
+   echo " "
+   meow " ✦ Updating target list as per your TEE status"
 
    {
      echo "# Last updated on $(date '+%A %d/%m/%Y %I:%M:%S%p')"
@@ -369,33 +478,44 @@ fi
      echo "android"
      echo "com.android.vending!"
      echo "com.google.android.gms!"
+     echo "com.google.android.contactkeys!"
+     echo "com.google.android.gsf!"
+     echo "com.google.android.ims!"
+     echo "com.google.android.safetycore!"
      echo "com.reveny.nativecheck!"
      echo "io.github.vvb2060.keyattestation!"
+     echo "io.github.qwq233.keyattestation!"
      echo "io.github.vvb2060.mahoshojo"
      echo "icu.nullptr.nativetest"
-   } > "$mona16"
+   } > "$mona09"
 
-    tee_detector "-3"
-    tee_detector "-s"
-   meow "- Target list has been updated "
+     tee_detector "-3"
+     tee_detector "-s"
+   meow " ✦ Target list has been updated "
 
-   if [ ! -f "$mona21" ]; then
-     echo "all=$mona19" > "$mona21"
+   if [ ! -f "$mona13" ]; then
+     echo "all=$mona12" > "$mona13"
    fi
 
-   meow "- TrickyStore spoof applied "
-   chmod 644 "$mona16"
+   meow " ✦ TrickyStore spoof applied "
+   chmod 644 "$mona09"
    meow " "
    sleep 1
  else
-   meow "- Skipping TS related functions, TrickyStore is not installed"
+   meow " ✦ Skipping TS related functions"
+   meow "  TrickyStore is not installed"
  fi
 
-# Remove openssl binaries & logs generate by any previous version of module (if exists)
-chmod +x "$mona10/cleanup.sh"
-sh "$mona10/cleanup.sh"
+# Remove banner for magisk users 
+if [ -f /data/adb/magisk/magisk ]; then
+  rm -f $mona05/.mona
+fi
 
-meow "- Smash The Action/WebUI After Rebooting"
+# Remove openssl binaries & logs generate by any previous version of module (if exists)
+chmod +x "$mona05/cleanup.sh"
+sh "$mona05/cleanup.sh"
+
+meow " ✦ Smash The Action/WebUI After Rebooting"
 meow " "
 meow " "
 meow "         ••• Installation Completed ••• "

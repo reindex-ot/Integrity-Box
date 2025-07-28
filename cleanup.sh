@@ -1,49 +1,80 @@
 #!/system/bin/sh
-FILE="/data/adb/tricky_store/keybox.xml"
-TMP="/data/adb/tricky_store/keybox.xml.tmp"
-L="/data/adb/Integrity-Box-Logs/remove.log"
-PLACEHOLDER="mona.sh"
 
-meow() {
-    echo "- $1" | tee -a "$L"
+F="/data/adb/tricky_store/keybox.xml"
+T="/data/adb/tricky_store/keybox.xml.tmp"
+L="/data/adb/Integrity-Box-Logs/remove.log"
+X="shine,bright,like,adiamond"
+
+log() {
+    echo "- $1" >> "$L"
 }
 
-nuke() {
+delete_if_exist() {
     path="$1"
     if [ -e "$path" ]; then
         rm -rf "$path"
-        meow "Deleted: $path"
+        log "Deleted: $path"
     fi
 }
 
-touch $L
-echo "" >> "$L"
-echo "••••••• Cleanup Started •••••••" >> "$L"
+mkdir -p "$(dirname "$L")"
+touch "$L"
+{
+    echo ""
+    echo "••••••• Cleanup Started •••••••"
 
-if [ ! -f "$FILE" ]; then
-    meow "File not found: $FILE"
-    exit 1
-fi
+    if [ ! -f "$F" ]; then
+        log "File not found: $F"
+        echo "••••••• Cleanup Aborted •••••••"
+        exit 1
+    fi
 
-echo "Removing leftover files..." >> "$L"
+    log "Removing leftover files from keybox.xml..."
 
-C1=""
-while IFS= read -r LINE; do
-    C2=$(echo "$LINE" | sed "s/$PLACEHOLDER//g")
-    C1="${C1}${C2}\n"
-done < "$FILE"
+Z="$(cat "$F")"
 
-printf "%b" "$C1" > "$TMP" && mv "$TMP" "$FILE"
+Y=""
+FIRST=1
+IFS=','
 
-nuke /data/adb/Integrity-Box/openssl
-nuke /data/adb/Integrity-Box/libssl.so.3
-nuke /data/adb/modules/Integrity-Box/system/bin/openssl
-nuke /data/data/com.termux/files/usr/bin/openssl
-nuke /data/data/com.termux/files/lib/openssl.so
-nuke /data/data/com.termux/files/lib/libssl.so
-nuke /data/data/com.termux/files/lib/libcrypto.so
-nuke /data/data/com.termux/files/lib/libssl.so.3
-nuke /data/data/com.termux/files/lib/libcrypto.so.3
+for LINE in $(echo "$Z"); do
+    for WORD in $X; do
+        LINE="${LINE//$WORD/}"
+    done
+    if [ "$FIRST" -eq 1 ]; then
+        Y="$LINE"
+        FIRST=0
+    else
+        Y="$Y
+$LINE"
+    fi
+done
 
-echo "•••••••= Cleanup Ended •••••••=" >> "$L"
-echo "" >> "$L"
+IFS="$OLD_IFS"
+
+printf "%s\n" "$Y" > "$T"
+mv "$T" "$F"
+
+    log "Deleting known leftover files..."
+    delete_if_exist /data/adb/Integrity-Box/openssl
+    delete_if_exist /data/adb/Integrity-Box/libssl.so.3
+    delete_if_exist /data/adb/modules/Integrity-Box/system/bin/openssl
+    delete_if_exist /data/data/com.termux/files/usr/bin/openssl
+    delete_if_exist /data/data/com.termux/files/lib/openssl.so
+    delete_if_exist /data/data/com.termux/files/lib/libssl.so
+    delete_if_exist /data/data/com.termux/files/lib/libcrypto.so
+    delete_if_exist /data/data/com.termux/files/lib/libssl.so.3
+    delete_if_exist /data/data/com.termux/files/lib/libcrypto.so.3
+    delete_if_exist /data/local/tmp/keybox_downloader
+    delete_if_exist /data/adb/modules_update/integrity_box/keybox_downloader.sh
+
+    if command -v pm >/dev/null 2>&1 && pm list packages | grep -q "meow.helper"; then
+        pm uninstall meow.helper >/dev/null 2>&1
+        log "Uninstalled: meow.helper"
+    else
+        log "App not found: meow.helper"
+    fi
+
+    echo "••••••• Cleanup Ended •••••••"
+    echo ""
+} >> "$L" 2>&1

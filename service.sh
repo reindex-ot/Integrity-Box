@@ -2,7 +2,7 @@
 
 # Define popup
 popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n meow.helper/.MainActivity &>/dev/null
+    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
     sleep 0.5
 }
 
@@ -24,7 +24,9 @@ nohello_prev=""
 # Loop to monitor toggle state
 while true; do
   if [ -f /sdcard/stop ]; then
-    popup "Stop file found. Exiting background loop."
+#    popup "Stop file found. Exiting background loop."
+    rm -rf $SHAMIKO_WHITELIST
+    rm -rf $NOHELLO_WHITELIST
     break
   fi
   

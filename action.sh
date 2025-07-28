@@ -5,33 +5,34 @@ KEY_DIR="/data/adb/modules/integrity_box"
 TMP_KEY="/dev/key_tmp"
 
 MENU="
+Update Keybox:key.sh
+Kill GMS process:kill.sh
+Set Custom Fingerprint:pif.sh
+Spoof PIF SDK:spoof.sh
+Add All apps in Target list:systemuser.sh
 Disable Auto-Whitelist Mode:stop.sh
 Enable Auto-Whitelist Mode:start.sh
-Add All apps in Target list:systemuser.sh
-Add User app only in Target list:user.sh
-Spoof TrickyStore patch:patch.sh
+Add only User apps in Target list:user.sh
+Spoof/Unspoof Security Patch:patch.sh
+Enable/Disable WebUI timeout:modal.sh
 Set AOSP keybox:aosp.sh
 Set Valid keybox (if AOSP):keybox.sh
-Set Custom Fingerprint:pif.sh
-Kill GMS process:kill.sh
-Spoof SDK:spoof.sh
+FIX Device not Certified:vending.sh
 Update SusFS Config:sus.sh
 Enable GMS Spoofing prop:setprop.sh
 Disable GMS Spoofing prop:resetprop.sh
 Abnormal Detection:abnormal.sh
 Flagged Apps Detection:app.sh
 Props Detection:prop.sh
-FIX Device not Certified:vending.sh
 Help Group:meowverse.sh
 Telegram Channel:meowdump.sh
 Report a problem:issue.sh
-Source Code:info.sh
-Support Developer:support.sh
+Change SElinux status:selinux.sh
 "
 
 popup() {
-  am start -a android.intent.action.MAIN -e mona "$@" -n meow.helper/.MainActivity &>/dev/null
-  sleep 0.5
+    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
+    sleep 0.5
 }
 
 draw_box() {
@@ -49,8 +50,8 @@ EOF
 print_menu() {
   clear
   draw_box "     Integrity-Box Menu "
-  echo "- Use Volume Down to navigate"
-  echo "+ Use Volume Up to execute"
+  echo " ✦ Use Volume Down to navigate"
+  echo " ✦ Use Volume Up to execute"
   echo " "
   print_selection_only
 }
@@ -101,7 +102,7 @@ while :; do
       LABEL=$(echo "$SELECTED" | cut -d: -f1)
       SCRIPT=$(echo "$SELECTED" | cut -d: -f2)
       sh "$SCRIPT_DIR/$SCRIPT"
-      echo "- Done."
+      echo " ✦ Done."
       break
       ;;
     41) # Volume Down
@@ -111,8 +112,8 @@ while :; do
       LABEL=$(echo "$SELECTED" | cut -d: -f1)
       clear
       draw_box "     Integrity-Box Menu "
-      echo "- Use Volume Down to navigate"
-      echo "+ Use Volume Up to execute"
+      echo " ✦ Use Volume Down to navigate"
+      echo " ✦ Use Volume Up to execute"
       echo " "
       print_selection_only
       ;;
