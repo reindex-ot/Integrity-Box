@@ -11,13 +11,13 @@ _I originally wrote this code in Notepad and haven’t been very active on GitHu
 
 | Section                  | Description                              |
 |--------------------------|------------------------------------------|
-| [Why I Built This Module](#-why-i-built-this-module) | Introduction and purpose of the module |
-| [Module Features](#-module-features)                     | Features offered by the module         |
-| [Pre-Requirements](#-pre-requirements)            | Required modules before usage          |
-| [Need help?](#-need-help)                         | Troubleshooting and tips                |
-| [Support](#-support)                             | Support & Contribution          |
-| [Preview](#-preview)                             | Screenshots and GIF previews            |
-| [Frequently Asked Questions](#-frequently-asked-questions) | Answers to common questions             |
+| [Why I Built This Module](#why-i-built-this-module) | Introduction and purpose of the module |
+| [Module Features](#module-features)                     | Features offered by the module         |
+| [Pre-Requirements](#pre-requirements)            | Required modules before usage          |
+| [Need help?](#need-help)                         | Troubleshooting and tips                |
+| [Support](#support)                             | Support & Contribution          |
+| [Preview](#preview)                             | Screenshots and GIF previews            |
+| [Frequently Asked Questions](#frequently-asked-questions) | Answers to common questions             |
 
 
 <div align="center">
@@ -140,4 +140,4 @@ This helps you stay informed about the actions being triggered and improves the 
 
 
 
-[Go to Top](#-table-of-contents)
+[Go to Top](#table-of-contents)
