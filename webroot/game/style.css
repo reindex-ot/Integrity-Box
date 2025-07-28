@@ -1,0 +1,14 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #87ceeb;
+  font-family: 'Mona', Arial, sans-serif;
+  touch-action: manipulation;
+}
+
+#gameCanvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  background: #87ceeb;
+}
