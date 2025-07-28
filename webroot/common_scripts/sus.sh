@@ -1,7 +1,7 @@
-# Meowpopup
+# popup function
 popup() {
-  am start -a android.intent.action.MAIN -e mona "$@" -n meow.helper/.MainActivity >/dev/null
-  sleep 0.5
+    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
+    sleep 0.5
 }
 
 # log file path and output file path

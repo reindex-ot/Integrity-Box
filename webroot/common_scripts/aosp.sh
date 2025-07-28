@@ -6,7 +6,7 @@ DEST_FILE="$DEST_DIR/keybox.xml"
 BACKUP_FILE="$DEST_DIR/keybox.xml.md"
 
 popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n meow.helper/.MainActivity &>/dev/null
+    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
     sleep 0.5
 }
 

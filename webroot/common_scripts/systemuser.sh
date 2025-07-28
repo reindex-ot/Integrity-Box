@@ -3,7 +3,7 @@ TARGET='/data/adb/tricky_store/target.txt'
 TEE_STATUS='/data/adb/tricky_store/tee_status'
 
 popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n meow.helper/.MainActivity > /dev/null
+    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
     sleep 0.5
 }
 
@@ -35,8 +35,14 @@ echo "com.android.vending!" >> "$TARGET"
 echo "com.google.android.gms!" >> "$TARGET"
 echo "com.reveny.nativecheck!" >> "$TARGET"
 echo "io.github.vvb2060.keyattestation!" >> "$TARGET"
+echo "io.github.qwq233.keyattestation!" >> "$TARGET"
 echo "io.github.vvb2060.mahoshojo" >> "$TARGET"
 echo "icu.nullptr.nativetest" >> "$TARGET"
+echo "com.google.android.contactkeys!" >> "$TARGET"
+echo "com.google.android.gsf!" >> "$TARGET"
+echo "com.google.android.ims!" >> "$TARGET"
+echo "com.google.android.safetycore!" >> "$TARGET"
+
 popup "This may take a while, have patience☕"
 echo "- Updating target list as per your TEE status"
 

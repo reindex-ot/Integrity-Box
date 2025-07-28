@@ -1,131 +1,108 @@
-#!/bin/sh
+#!/system/bin/sh
 
-# Path to module and JSON files
-MODDIR=/data/adb/modules/playintegrityfix
-PIF_PATH="$MODDIR/pif.json"
-PIF_FORK_PATH="$MODDIR/custom.pif.json"
-L="/data/adb/Integrity-Box-Logs/spoof.log"
+# Define paths
+LOG_FILE="/data/adb/Integrity-Box-Logs/spoofing.log"
 
-# popup message 
+# Define prop files
+PROP_FILE_1="/data/adb/modules/playintegrityfix/pif.prop"
+PROP_FILE_2="/data/adb/pif.prop"
+
+# Popup function
 popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n meow.helper/.MainActivity &>/dev/null
+    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
     sleep 0.5
 }
 
-# Logger
-meow() { echo -e "$1" | tee -a "$L"; }
-
-# Function to create backup of the fingerprint
-create_backup() {
-    local json_file=$1
-    local backup_file="${json_file}.bak"
-    
-    cp "$json_file" "$backup_file"
-    meow "- Backup created 🌟"
+# Logger function
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$LOG_FILE"
 }
 
-# Function to restore the backup of the fingerprint
-restore_backup() {
-    local json_file=$1
-    local backup_file="${json_file}.bak"
+log " "
+log " "
 
-    if [ -f "$backup_file" ]; then
-        cp "$backup_file" "$json_file"
-        meow "- Backup restored 🌟"
-        popup "spoofVendingSdk disabled"
+FOUND_ANY=0
+
+# Function to toggle boolean props
+toggle_bool() {
+    file="$1"
+    key="$2"
+    value=$(grep -E "^$key=" "$file" | cut -d'=' -f2)
+
+    if [ "$value" = "true" ]; then
+        sed -i "s/^$key=true/$key=false/" "$file"
+        log "$file: $key → false"
+    elif [ "$value" = "false" ]; then
+        sed -i "s/^$key=false/$key=true/" "$file"
+        log "$file: $key → true"
     else
-        meow "🍳 Skipped"
+        log "$file: $key not found or not boolean"
     fi
 }
 
-# Function to check and update the  fingerprint
-update_json() {
-    local json_file=$1
-    local spoof_value=$2
-
-    # Create a backup before making any changes
-    create_backup "$json_file"
-
-    if [ ! -f "$json_file" ]; then
-        exit 1
-    fi
-
-    if [ "$spoof_value" -eq 0 ]; then
-        sed -i '/"spoofVendingSdk":/d' "$json_file"
-        sed -i '/\/\/ This key is used to spoof Vending SDK for compatibility purposes./d' "$json_file"
-        popup "spoof removed successfully"
-        meow "spoofVendingSdk removed from $json_file"
+# Force key to false
+force_false() {
+    file="$1"
+    key="$2"
+    if grep -q "^$key=" "$file"; then
+        sed -i "s/^$key=.*/$key=false/" "$file"
     else
-        if grep -q '"spoofVendingSdk":' "$json_file"; then
-            current_value=$(grep '"spoofVendingSdk":' "$json_file" | awk -F': ' '{print $2}' | tr -d ',')
-
-            if [ "$current_value" -eq "$spoof_value" ]; then
-                return
-            else
-                sed -i '/"spoofVendingSdk":/d' "$json_file"
-            fi
-        fi
-
-        if [ "$json_file" == "$PIF_FORK_PATH" ]; then
-            sed -i '/}/i \ \n     "spoofVendingSdk": '$spoof_value',' "$json_file"
-            sed -i '/}/i \ \n  // This key is used to spoof Vending SDK for compatibility purposes.' "$json_file"
-            popup "spoofed successfully"
-            meow "spoofVendingSdk added to custom.pif.json"
-        else
-            sed -i '/}/i \  "spoofVendingSdk": '$spoof_value',' "$json_file"
-            sed -i '/}/i \  // This key is used to spoof Vending SDK for compatibility purposes.' "$json_file"
-            popup "spoofed successfully"
-            meow "spoofVendingSdk added to pif.json"
-        fi
+        echo "$key=false" >> "$file"
     fi
+    log "$file: $key → forced to false"
 }
 
-# Preview 
-meow "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-meow "   [➕]  Enable spoofVendingSdk"
-meow "   [➖]  Disable spoofVendingSdk"
-meow "   [🔴]  Cancel"
-meow "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-meow " "
-popup " Vol+ Enable / Vol- Disable"
-# Choose the fingeprint (check if custom.pif.json exists, otherwise use pif.json)
-if [ -f "$PIF_FORK_PATH" ]; then
-    json_file=$PIF_FORK_PATH
-else
-    json_file=$PIF_PATH
+# Header
+log "──────── TOGGLE SPOOF FLAGS ────────"
+
+# Process both files
+for PIF_PROP in "$PROP_FILE_1" "$PROP_FILE_2"; do
+    if [ -f "$PIF_PROP" ]; then
+        FOUND_ANY=1
+
+        # Backup
+        BACKUP="$PIF_PROP.bak"
+        cp -f "$PIF_PROP" "$BACKUP"
+        log "Backup created: $BACKUP"
+
+        # Toggle spoof flags
+        toggle_bool "$PIF_PROP" "spoofProvider"
+        toggle_bool "$PIF_PROP" "spoofSignature"
+        toggle_bool "$PIF_PROP" "spoofProps"
+
+        # Force false
+        force_false "$PIF_PROP" "DEBUG"
+        force_false "$PIF_PROP" "spoofVendingSdk"
+    fi
+done
+
+# If no files found, exit
+if [ "$FOUND_ANY" -eq 0 ]; then
+    log "❌ No spoofing prop files found"
+    popup "This feature is only for PIF inject"
+    exit 1
 fi
 
-# Key press handling
-key_handler() {
-    local result
-
-    while true; do
-        keys=$(getevent -lqc1)
-
-        if echo "$keys" | grep -q 'KEY_VOLUMEUP.*DOWN'; then
-            result=1
-            break
-        elif echo "$keys" | grep -q 'KEY_VOLUMEDOWN.*DOWN'; then
-            result=0
-            break
-        elif echo "$keys" | grep -q 'KEY_POWER.*DOWN'; then
-            exit 0
-        fi
-        sleep 1
-    done
-
-    return $result
-}
-
-# Wait for key input and get the selected value
-key_handler
-spoofVendingSdk_value=$?
-
-# If Volume Down is pressed (spoof_value is 0), restore the backup
-if [ "$spoofVendingSdk_value" -eq 0 ]; then
-    restore_backup "$json_file"
+# Determine spoofing status from the first valid file
+if [ -f "$PROP_FILE_1" ]; then
+    spoof_status=$(grep "^spoofProvider=" "$PROP_FILE_1" | cut -d'=' -f2)
+elif [ -f "$PROP_FILE_2" ]; then
+    spoof_status=$(grep "^spoofProvider=" "$PROP_FILE_2" | cut -d'=' -f2)
 else
-    # Update thefingerprint with the selected value
-    update_json "$json_file" $spoofVendingSdk_value
+    spoof_status="unknown"
 fi
+
+# Popup status
+if [ "$spoof_status" = "true" ]; then
+    popup "✅ Spoofing enabled"
+    log "Popup: Spoofing enabled"
+else
+    popup "⚠️ Spoofing disabled"
+    log "Popup: Spoofing disabled"
+fi
+
+# Footer
+log "✅ Toggling complete"
+log " "
+log " "
 exit 0

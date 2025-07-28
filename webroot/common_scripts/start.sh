@@ -5,8 +5,8 @@ shamiko="/data/adb/shamiko/whitelist"
 nohello="/data/adb/nohello/whitelist"
 
 popup() {
-  am start -a android.intent.action.MAIN -e mona "$1" -n meow.helper/.MainActivity &>/dev/null
-  sleep 0.5
+    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
+    sleep 0.5
 }
 
 # Remove the stop file

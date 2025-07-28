@@ -5,117 +5,111 @@ TIME=$(date "+%Y-%m-%d %H:%M:%S")
 Q="------------------------------------------"
 R="════════════════════════════"
 
-log() {
-    echo -e "$1" | tee -a "$L"
-}
+log() { echo -e "$1" | tee -a "$L"; }
 
 popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n meow.helper/.MainActivity &>/dev/null
+    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
     sleep 0.5
 }
 
-# Clear log and start fresh
+# Start fresh
 echo -e "$Q" > "$L"
-echo -e "- INTEGRITY-BOX PROP DETECTION | $TIME " >> "$L"
+echo -e "- INTEGRITY-BOX PROP DUMP | $TIME" >> "$L"
 echo -e "$Q\n" >> "$L"
 
-# ROOT & MAGISK DETECTION
-log "- Root & Magisk Detection"
-ROOT_PROPS="ro.secure ro.debuggable service.adb.root"
-MAGISK_PROPS="init.svc.magiskd ro.boot.verifiedbootstate ro.boot.flash.locked ro.boot.warranty_bit ro.boot.veritymode"
+# Log props by category
+print_props() {
+    local title="$1"
+    shift
+    local props="$@"
+    log "- $title"
+    for prop in $props; do
+        value=$(getprop "$prop")
+        [ -n "$value" ] && log "   └─ $prop = $value"
+    done
+    log "$Q\n"
+}
 
-ROOT_FOUND=""
-MAGISK_FOUND=""
+# Categories & Props
+print_props "Root & Debuggable Props" \
+    ro.secure ro.debuggable service.adb.root init.svc.adbd init.svc.magiskd ro.build.selinux ro.boot.selinux
 
-for prop in $ROOT_PROPS; do
-    VALUE=$(getprop $prop)
-    [ "$VALUE" = "0" ] || [ "$VALUE" = "1" ] && ROOT_FOUND="$ROOT_FOUND\n$prop=$VALUE"
+print_props "Verified Boot & AVB Props" \
+    ro.boot.verifiedbootstate ro.boot.vbmeta.device_state ro.boot.flash.locked ro.boot.veritymode \
+    ro.boot.verifiedstate ro.boot.avb_version
+
+print_props "Build & Signature Info" \
+    ro.build.tags ro.build.type ro.build.user ro.build.host \
+    ro.build.version.incremental ro.build.version.release \
+    ro.build.display.id ro.build.version.security_patch
+
+log "- Emulator / Virtual Machine Check"
+SHOW_EMU_SECTION=0
+EMULATOR_PROPS="ro.kernel.qemu ro.hardware ro.product.device ro.product.manufacturer"
+
+for prop in $EMULATOR_PROPS; do
+    val=$(getprop "$prop")
+    case "$val" in
+        *goldfish*|*ranchu*|*emulator*|*genymotion*|*vbox*|*qemu*)
+            [ "$SHOW_EMU_SECTION" -eq 0 ] && log "- Emulator / Virtual Machine Check" && SHOW_EMU_SECTION=1
+            log "   └─ ⚠️ $prop = $val"
+            ;;
+    esac
 done
+[ "$SHOW_EMU_SECTION" -eq 1 ] && log "$Q\n"
 
-for prop in $MAGISK_PROPS; do
-    VALUE=$(getprop $prop)
-    [ -n "$VALUE" ] && MAGISK_FOUND="$MAGISK_FOUND\n$prop=$VALUE"
-done
+log "- Play Integrity / SafetyNet Check"
+SHOW_INTEGRITY_SECTION=0
 
-[ -n "$ROOT_FOUND" ] && log "   └─ ⚠️ Root Indicators:\n$ROOT_FOUND" || log "   └─ ✅ Not Found"
-[ -n "$MAGISK_FOUND" ] && log "   └─ ⚠️ Magisk Indicators:\n$MAGISK_FOUND" || log "   └─ ✅ Not Found"
-log "$Q"
-log " "
+FINGERPRINT=$(getprop ro.build.fingerprint | tr '[:upper:]' '[:lower:]')
+BRAND=$(getprop ro.product.brand | tr '[:upper:]' '[:lower:]')
+MODEL=$(getprop ro.product.model | tr '[:upper:]' '[:lower:]')
+MANUFACTURER=$(getprop ro.product.manufacturer | tr '[:upper:]' '[:lower:]')
 
-# CUSTOM ROM DETECTION -
-CUSTOM_ROM_PROPS="ro.build.fingerprint ro.build.version.incremental ro.modversion"
-CUSTOM_ROM_FOUND=""
-
-for prop in $CUSTOM_ROM_PROPS; do
-    VALUE=$(getprop $prop)
-    echo "$VALUE" | grep -qE "lineage|crdroid|aosp|evolution" && CUSTOM_ROM_FOUND="$CUSTOM_ROM_FOUND\n$prop=$VALUE"
-done
-
-if [ -n "$CUSTOM_ROM_FOUND" ]; then
-    echo "Detected Custom ROM"
-    log "- Custom ROM Detection"
-    log "   └─ ⚠️ Custom ROM Properties:\n$CUSTOM_ROM_FOUND"
-    log "$Q"
-    log " "
+# Detect spoofed props (e.g., Pixel brand on non-Pixel fingerprint)
+if echo "$BRAND" | grep -qE "google|pixel"; then
+    if ! echo "$FINGERPRINT" | grep -qE "google|pixel"; then
+        [ "$SHOW_INTEGRITY_SECTION" -eq 0 ] && log "- Play Integrity / SafetyNet Check" && SHOW_INTEGRITY_SECTION=1
+        log "   └─ ⚠️ Possibly spoofed brand: ro.product.brand = $BRAND"
+    fi
 fi
 
-# PLAY INTEGRITY & SAFETYNET BYPASS
-log "- Play Integrity & SafetyNet Bypass"
-SAFETYNET_PROPS="ro.product.model ro.boot.hardware.keystore ro.build.characteristics"
+if echo "$MODEL" | grep -qE "pixel"; then
+    if ! echo "$FINGERPRINT" | grep -qE "google|pixel"; then
+        [ "$SHOW_INTEGRITY_SECTION" -eq 0 ] && log "- Play Integrity / SafetyNet Check" && SHOW_INTEGRITY_SECTION=1
+        log "   └─ ⚠️ Possibly spoofed model: ro.product.model = $MODEL"
+    fi
+fi
 
-SAFETYNET_FOUND=""
-
-for prop in $SAFETYNET_PROPS; do
-    VALUE=$(getprop $prop)
-    echo "$VALUE" | grep -qE "Pixel|software|emulator" && SAFETYNET_FOUND="$SAFETYNET_FOUND\n$prop=$VALUE"
+# Detect missing values
+INTEGRITY_PROPS="ro.build.characteristics ro.boot.hardware.keystore ro.product.first_api_level ro.build.flavor"
+for prop in $INTEGRITY_PROPS; do
+    val=$(getprop "$prop")
+    if [ -z "$val" ]; then
+        [ "$SHOW_INTEGRITY_SECTION" -eq 0 ] && log "- Play Integrity / SafetyNet Check" && SHOW_INTEGRITY_SECTION=1
+        log "   └─ ⚠️ Missing or empty: $prop"
+    fi
 done
 
-[ -n "$SAFETYNET_FOUND" ] && log "   └─ ⚠️ Spoofing Detected:\n$SAFETYNET_FOUND" || log "   └─ ✅ Not Found"
-log "$Q"
-log " "
+[ "$SHOW_INTEGRITY_SECTION" -eq 1 ] && log "$Q\n"
 
-# KERNEL & SELINUX CHECK
-log "- Kernel & SELinux State"
-KERNEL_PROPS="ro.kernel.qemu ro.boot.selinux"
-KERNEL_FOUND=""
+print_props "Fingerprint & ROM Identity" \
+    ro.build.fingerprint ro.system.build.fingerprint ro.product.system.fingerprint \
+    ro.system_ext.build.fingerprint ro.vendor.build.fingerprint
 
-for prop in $KERNEL_PROPS; do
-    VALUE=$(getprop $prop)
-    [ "$VALUE" = "1" ] || [ "$VALUE" = "permissive" ] && KERNEL_FOUND="$KERNEL_FOUND\n$prop=$VALUE"
-done
+print_props "DRM / Keystore / GMS" \
+    ro.hardware.keystore drm.service.enabled ro.com.google.gmsversion \
+    ro.com.google.clientidbase ro.config.dmverity ro.crypto.state
 
-[ -n "$KERNEL_FOUND" ] && log "   └─ ⚠️ Security Risk:\n$KERNEL_FOUND" || log "   └─ ✅ Not Found"
-log "$Q"
-log " "
+print_props "OEM / Bootloader State" \
+    ro.oem_unlock_supported ro.boot.bootloader ro.boot.bootdevice \
+    ro.boot.verifiedboot ro.boot.veritymode ro.boot.slot_suffix
 
-# VIRTUAL MACHINE & EMULATOR DETECTION
-log "- Emulator & Virtual Machine Detection"
-VM_PROPS="ro.hardware ro.product.manufacturer ro.build.characteristics"
-VM_FOUND=""
+print_props "Timezone / Locale" \
+    persist.sys.timezone persist.sys.locale ro.product.locale \
+    ro.product.locale.language ro.product.locale.region
 
-for prop in $VM_PROPS; do
-    VALUE=$(getprop $prop)
-    echo "$VALUE" | grep -qE "goldfish|ranchu|Genymotion|emulator" && VM_FOUND="$VM_FOUND\n$prop=$VALUE"
-done
-
-[ -n "$VM_FOUND" ] && log "   └─ ⚠️ Emulator Detected:\n$VM_FOUND" || log "   └─ ✅ Not Found"
-log "$Q"
-log " "
-
-# NETWORK & VPN/PROXY DETECTION
-log "- VPN & Proxy Detection"
-NETWORK_PROPS="net.tcp.buffersize.wifi net.hostname"
-NETWORK_FOUND=""
-
-for prop in $NETWORK_PROPS; do
-    VALUE=$(getprop $prop)
-    [ -n "$VALUE" ] && NETWORK_FOUND="$NETWORK_FOUND\n$prop=$VALUE"
-done
-
-[ -n "$NETWORK_FOUND" ] && log "   └─ ⚠️ Suspicious Network Settings:\n$NETWORK_FOUND" || log "   └─ ✅ Not Found"
-log "$Q"
-log " "
-
-log "- Detection Complete! ✅\n"
+# End
+log "- Prop Dump Complete ✅"
 echo -e "$R" >> "$L"
 popup "Log saved to $L"

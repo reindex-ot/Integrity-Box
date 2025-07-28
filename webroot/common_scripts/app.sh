@@ -10,7 +10,7 @@ log() {
 }
 
 popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n meow.helper/.MainActivity &>/dev/null
+    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
     sleep 0.5
 }
 
@@ -21,9 +21,10 @@ echo -e "$Q\n" >> "$L"
 
 # Risky Apps Detection
 log "- Risky Apps Detection"
-RISKY_APPS="com.rifsxd.ksunext:KernelSU Next
+RISKY_APPS="com.rifsxd.ksunext:KernelSU_Next
 me.weishu.kernelsu:KernelSU
 com.google.android.hmal:Hide_My_Applist
+com.reveny.vbmetafix.service:VBmeta_Fixer
 me.twrp.twrpapp:TWRP
 com.termux:Termux
 com.slash.batterychargelimit:Battery_Charging_Limit
