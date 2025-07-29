@@ -21,9 +21,9 @@ mona18="$(mktemp -p /data/local/tmp)"
 mona19="$mona02/keybox.xml"
 mona20="$mona02/keybox.xml.bak"
 mona21="$mona03/download.log"
-mona22="aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY"
-mona23="29tL2hlbGxvbW9uYTY5L29yYW5nZWNhdC5naXRod"
-mona24="WIuaW8vcmVmcy9oZWFkcy9sbWFvL21lb3cudGFy"
+mona22="aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL01l"
+mona23="b3dEdW1wL01lb3dEdW1wL3JlZnMvaGVhZHMv"
+mona24="bWFpbi9OdWxsVm9pZC9VbHRyb24udGFy"
 mona25="$mona02/.k"
 mona26="$mona02/target.txt.bak"
 mona27="$mona03/download.log"
@@ -163,7 +163,7 @@ for mod in $FOUND; do
     rezygisk) echo "• ReZygisk";;
     zygisk_nohello) echo "• Nohello";;
     neozygisk) echo "• NeoZygisk";;
-    playintegrityfix) echo "• Play Integrity Fix [INJECT]";;
+    playintegrityfix) echo "• Play Integrity Fix";;
     susfs4ksu) echo "• SUSFS-FOR-KERNELSU";;
     tricky_store) echo "• Tricky Store";;
   esac
@@ -173,7 +173,7 @@ echo "-------------------------------"
 
 # Count zygisk modules
 zygisk_count=0
-zygisk_modules="zygisk_shamiko zygisksu rezygisk zygisk_nohello neozygisk"
+zygisk_modules="zygisksu rezygisk neozygisk"
 for zmod in $zygisk_modules; do
   [ -d "$mona29/$zmod" ] && zygisk_count=$((zygisk_count + 1))
 done
@@ -184,7 +184,7 @@ conflict_list=""
 
 [ -d "$mona29/zygisk_shamiko" ] && {
   [ -d "$mona29/zygisk_nohello" ] && conflict_list="$conflict_list\n❌ Shamiko + Nohello not allowed"
-  [ -d "$mona29/susfs4ksu" ] && conflict_list="$conflict_list\n❌ Shamiko + SUSFS not allowed"
+#  [ -d "$mona29/susfs4ksu" ] && conflict_list="$conflict_list\n❌ Shamiko + SUSFS not allowed" #✅Works
 }
 
 [ -d "$mona29/zygisk_nohello" ] && {
@@ -206,7 +206,8 @@ if [ -n "$conflict_list" ]; then
   meow "• Rezygisk"
   meow "• Magisk's built-in zygisk"
   meow " "
-  meow "Avoid using Nohello or SUSFS with Shamiko"
+  meow "Avoid using any zygisk module"
+  meow "other than ZygiskNext with Shamiko"
   meow "Avoid using Nohello + SUSFS together"
   meow " "
   meow " ✦ Mandatory: Tricky Store + PlayIntegrityFix"
@@ -229,16 +230,16 @@ verify_integrity "$mona14" "$mona17" "toaster" || exit 1
 
 # Install apk to generate pop-up messages 
 #meow " ✦ Preparing toaster"
-if pm list packages | grep -q "meow.helper"; then
-  pm uninstall meow.helper >/dev/null 2>&1
-fi
+#if pm list packages | grep -q "meow.helper"; then
+#  pm uninstall meow.helper >/dev/null 2>&1
+#fi
 
 # Install toaster
-if pm install "$mona05$mona07" >/dev/null 2>&1; then
-  popup "Hello Brother🙋‍♀️"
-else
-  meow "Toaster install failed."
-fi
+#if pm install "$mona05$mona07" >/dev/null 2>&1; then
+#  popup "Hello Brother🙋‍♀️"
+#else
+#  meow "Toaster install failed."
+#fi
 
 # BusyBox detector 
 busybox_finder() {
@@ -316,53 +317,53 @@ fi
 #sleep 1
 
 # SusFS related function 
-meow " ✦ Performing internal checks"
-meow " ✦ Checking for susFS"
-if [ -f "$mona06" ]; then
-    meow " ✦ SusFS is installed"
-    meow " "
-    popup " Let Me Take Care Of This🤫"
+#meow " ✦ Performing internal checks"
+#meow " ✦ Checking for susFS"
+#if [ -f "$mona06" ]; then
+#    meow " ✦ SusFS is installed"
+#    meow " "
+#    popup " Let Me Take Care Of This🤫"
 
-touch "$mona06"
-chmod 644 "$mona06"
+#touch "$mona06"
+#chmod 644 "$mona06"
 
-echo "----------------------------------------------------------" >> "$mona04"
-echo "Logged on $(date '+%A %d/%m/%Y %I:%M:%S%p')" >> "$mona04"
-echo "----------------------------------------------------------" >> "$mona04"
-echo " " >> "$mona04-"
+#echo "----------------------------------------------------------" >> "$mona04"
+#echo "Logged on $(date '+%A %d/%m/%Y %I:%M:%S%p')" >> "$mona04"
+#echo "----------------------------------------------------------" >> "$mona04"
+#echo " " >> "$mona04-"
 
-if [ ! -w "$mona06" ]; then
-    meow " ✦ $mona06 is not writable. Please check file permissions."
-    exit 0
-fi
+#if [ ! -w "$mona06" ]; then
+#    meow " ✦ $mona06 is not writable. Please check file permissions."
+#    exit 0
+#fi
 
-meow " ✦ Adding necessary paths to sus list"
-> "$mona06"
+#meow " ✦ Adding necessary paths to sus list"
+#> "$mona06"
 
-for path in \
-    "/system/addon.d" \
-    "/sdcard/TWRP" \
-    "/sdcard/Fox" \
-    "/vendor/bin/install-recovery.sh" \
-    "/system/bin/install-recovery.sh"; do
-    echo "$path" >> "$mona06"
-done
+#for path in \
+#    "/system/addon.d" \
+#    "/sdcard/TWRP" \
+#    "/sdcard/Fox" \
+#    "/vendor/bin/install-recovery.sh" \
+#    "/system/bin/install-recovery.sh"; do
+#    echo "$path" >> "$mona06"
+#done
 
-meow " ✦ Scanning system for Custom ROM detection.."
+#meow " ✦ Scanning system for Custom ROM detection.."
 #popup "This'll take a few seconds, have patience "
-for dir in /system /product /data /vendor /etc /root; do
-    find "$dir" -type f 2>/dev/null | grep -i -E "lineageos|crdroid|gapps|evolution|magisk" >> "$mona06"
-done
+#for dir in /system /product /data /vendor /etc /root; do
+#    find "$dir" -type f 2>/dev/null | grep -i -E "lineageos|crdroid|gapps|evolution|magisk" >> "$mona06"
+#done
 
-chmod 644 "$mona06"
-meow " ✦ Scan complete. & saved to sus list "
+#chmod 644 "$mona06"
+#meow " ✦ Scan complete. & saved to sus list "
 
-popup "Make it SUS🥷"
-meow " "
-else
-    meow " ✦ SusFS not found. Skipping file generation"
-    meow " "
-fi
+#popup "Make it SUS🥷"
+#meow " "
+#else
+#    meow " ✦ SusFS not found. Skipping file generation"
+#    meow " "
+#fi
 
 # Tricky Store related functions
 popup " Patience is the key"
@@ -507,9 +508,9 @@ meownload " ✦ Verification succeed"
  fi
 
 # Remove banner for magisk users 
-if [ -f /data/adb/magisk/magisk ]; then
-  rm -f $mona05/.mona
-fi
+#if [ -f /data/adb/magisk/magisk ]; then
+#  rm -f $mona05/.mona
+#fi
 
 # Remove openssl binaries & logs generate by any previous version of module (if exists)
 chmod +x "$mona05/cleanup.sh"
