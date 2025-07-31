@@ -42,7 +42,7 @@
 -  Shows banned keybox list
 -  Set's verified boot hash via SusFs
 -  Detects abnormal activity to help debug issues
--  More feature are there, check [WebUI](https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/10.png)
+-  More feature are there, check [WebUI](https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/webui.gif)
 
 ## Pre-Requirements
 
