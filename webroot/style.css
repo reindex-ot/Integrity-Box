@@ -7,16 +7,16 @@
   src: url('meowna.ttf') format('truetype');
 }
 :root {
-  --bg: #000000;
-  --fg: #f5f5f5;
-  --accent: #FF0000;
-  --panel-bg: #000000;
-  --btn-hover: #742A2A;
-  --border-color: #451212;
-  --success: #4ade80;
-  --error: #ff4c4c;
-  --loading: #facc15;
-  --highlight: #3d2c2c;
+  --bg: #121212;
+  --fg: #f5d491;
+  --accent: #f5d491;
+  --panel-bg: #1c1c1c;
+  --btn-hover: #2a2a2a;
+  --border-color: #333333;
+  --success: #81c784;
+  --error: #FF0000;
+  --loading: #ffb300;
+  --highlight: #ffeac0;
 }
 body {
   margin: 0;
@@ -96,16 +96,16 @@ input:checked + .slider::before { transform: translateX(18px); }
 }
 
 .light {
-  --bg: #fff6f6;
-  --fg: #1e1e1e;
-  --accent: #FF0000;
-  --panel-bg: #ffeaea;
-  --btn-hover: #ffdada;
-  --border-color: #fcbcbc;
-  --success: #22c55e;
-  --error: #FF0000;
-  --loading: #facc15;
-  --highlight: #fff1f1;
+  --bg: #fff0f4;
+  --fg: #2b2b2b;
+  --accent: #ec407a;
+  --panel-bg: #fce4ec;
+  --btn-hover: #f8bbd0;
+  --border-color: #f3c8d7;
+  --success: #43a047;
+  --error: #e53935;
+  --loading: #fbc02d;
+  --highlight: #f8bbd0;
 }
 
 .light body {
@@ -493,6 +493,10 @@ input:checked + .slider::before { transform: translateX(18px); }
 
 .light .sparkle {
   background: #FF0000;
+}
+
+.root .sparkle {
+  background: #f5d491;
 }
 
 @media (max-width: 600px) {

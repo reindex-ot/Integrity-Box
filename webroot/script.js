@@ -83,7 +83,7 @@ async function updateDashboard() {
     statusSusfs.textContent = "Detected";
     statusSusfs.className = "status-indicator enabled";
   } catch {
-    statusSusfs.textContent = "Not Found";
+    statusSusfs.textContent = "N/A";
     statusSusfs.className = "status-indicator disabled";
   }
 }
@@ -151,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     const overlay = document.getElementById("intro-overlay");
     if (overlay) overlay.remove();
-  }, 6000);
+  }, 3000);
 
   document.querySelectorAll(".btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
