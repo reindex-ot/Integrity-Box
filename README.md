@@ -1,5 +1,12 @@
 `I originally wrote this code in Notepad and haven’t been very active on Git. I’m uploading it here mainly to keep things transparent. Feel free to inspect the code.`
 `Happy debugging`
+<details>
+<summary><strong>Why I Built This Module</strong></summary>
+
+
+*I noticed a lot of people either selling leaked keyboxes or paying for modules that claim to pass strong Play Integrity but only offer leaked keyboxes. I created this module to give you **real**, **working keyboxes** completely **free**, no hidden charges, no scams, just **legit access** along with several useful features. 🚫🔑*
+</details>
+
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/catppuccin/catppuccin/main/assets/footers/gray0_ctp_on_line.svg?sanitize=true" alt="Catppuccin Footer" />
@@ -10,12 +17,6 @@
     <img src="DUMP/download.png" alt="Download Button" width="600" />
   </a>
 </div>
-
-
-## Why I Built This Module
-
-*I noticed a lot of people either selling leaked keyboxes or paying for modules that claim to pass strong Play Integrity but only offer leaked keyboxes. I created this module to give you **real**, **working keyboxes** completely **free**, no hidden charges, no scams, just **legit access** along with several useful features. 🚫🔑*
-
 
 ## Module Features
 
@@ -95,7 +96,7 @@
   </tr>
   <tr>
     <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/4.png" alt="10" style="max-width: 100%; height: auto;" /></td>
-    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/module.png" alt="11" style="max-width: 100%; height: auto;" /></td>
+    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/module.png" alt="11" style="max-width: 100%; height: 2400;" /></td>
     <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/1.png" alt="12" style="max-width: 100%; height: auto;" /></td>
   </tr>
 </table>
