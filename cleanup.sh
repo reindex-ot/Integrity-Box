@@ -3,7 +3,7 @@
 F="/data/adb/tricky_store/keybox.xml"
 T="/data/adb/tricky_store/keybox.xml.tmp"
 L="/data/adb/Integrity-Box-Logs/remove.log"
-X="shine,bright,like,adiamond"
+X="shine,bright,like,adiamond,moona.xd"
 
 log() {
     echo "- $1" >> "$L"
@@ -29,7 +29,7 @@ touch "$L"
         exit 1
     fi
 
-    log "Removing leftover files from keybox.xml..."
+    log "Removing leftover files"
 
 Z="$(cat "$F")"
 

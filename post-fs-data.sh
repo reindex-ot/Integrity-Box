@@ -13,34 +13,26 @@ BNR="/data/adb/modules/AOSP_Dialer/module.prop"
 
 log() { echo -e "$1" | tee -a "$L"; }
 
-# Remove unwanted files
-if [ -e /data/adb/modules/integrity_box/disable ]; then
-    rm -rf /data/adb/modules/integrity_box/disable
-    log "Module re-enabled successfully"
-else
+#if [ -e /data/adb/modules/integrity_box/disable ]; then
+#    rm -rf /data/adb/modules/integrity_box/disable
+#    log "Module re-enabled successfully"
+#else
     log "Status 1"
-fi
+#fi
 
 if [ -e /data/adb/shamiko/whitelist ]; then
     rm -rf /data/adb/shamiko/whitelist
-    log "Nuked whitelist to avoid bootloop"
+    log "Removed whitelist to avoid bootloop"
 else
     log "Status 2"
 fi
 
-if [ -e /data/adb/modules/Integrity-Box]; then
+if [ -e /data/adb/modules/Integrity-Box ]; then
     rm -rf /data/adb/modules/Integrity-Box
-    log "Nuked old integrity box module"
+    log "Removed old integrity box module"
 else
     log "Status 3"
 fi
-
-#if [ -e /data/adb/modules/integrity_box/keybox_downloader.sh ]; then
-#    rm -rf /data/adb/modules/integrity_box/keybox_downloader.sh
-#    log "Nuked key download script"
-#else
-#    log "Status 4"
-#fi
 
 # Lists for sorted display
 ENABLED_LIST=""
@@ -62,33 +54,30 @@ append_item() {
 [ -d "$SUSFS" ] && ENABLED_LIST=$(append_item "$ENABLED_LIST" "SusFS ✅") || DISABLED_LIST=$(append_item "$DISABLED_LIST" "SusFS ❌")
 [ -d "$PIF" ] && ENABLED_LIST=$(append_item "$ENABLED_LIST" "PIF ✅") || DISABLED_LIST=$(append_item "$DISABLED_LIST" "PIF ❌")
 
+# Get system info
+DEVICE_MODEL=$(getprop ro.product.system.model)
+[ -z "$DEVICE_MODEL" ] && DEVICE_MODEL=$(getprop ro.build.product)
+ANDROID_VERSION=$(getprop ro.build.version.release)
+SELINUX=$(getenforce)
+
 # Combine and format final description
 ALL_MODULES="$ENABLED_LIST"
 [ -n "$DISABLED_LIST" ] && ALL_MODULES="$ALL_MODULES | $DISABLED_LIST"
-description="description=assist mode: $ALL_MODULES"
+description="description=𝗮𝘀𝘀𝗶𝘀𝘁 𝗺𝗼𝗱𝗲: $ALL_MODULES | 𝗔𝗻𝗱𝗿𝗼𝗶𝗱: $ANDROID_VERSION | 𝗦𝗘.𝗟𝗶𝗻𝘂𝘅: $SELINUX | 𝗗𝗲𝘃𝗶𝗰𝗲: $DEVICE_MODEL"
 
 # Update module.prop
 sed -i "s/^description=.*/$description/" "$MODDIR/module.prop"
 
-# sed -i 's/^author=.*/author=𝗠𝗘𝗢𝗪𝗻𝗮 💅 || tg@MeowDump/' "$MODDIR/module.prop"
+ sed -i 's/^author=.*/author=𝗠𝗘𝗢𝗪𝗻𝗮 💅 || tg@MeowDump/' "$MODDIR/module.prop"
+ log "Status 4"
 
 if [ -f "$BNR" ]; then
     sed -i '/^banner=/d' "$BNR"
-    log " Status 5"
+    log "Status 5"
 fi
 
-# Check if the destination directory exists   (DEPRECIATED)
-#if [ ! -d "$SUSFS" ]; then
-#    log "- Directory not found: $SUSFS"
-#    exit 0
-#fi
+# Randomize banner image (1 to 8)
+RANDOM_NUM=$(( (RANDOM % 8) + 1 ))
+sed -i "s|^banner=.*|banner=https://raw.githubusercontent.com/MeowDump/MeowDump/590b50e067b2b50d4a2236313530fcd7670331fe/Banner/mona$RANDOM_NUM.png|" "$MODDIR/module.prop"
 
-# SusFs action button [DEPRECIATED]
-# Copy 
-#cp "$SRC" "$DEST_FILE"
-
-# Set perms
-#chmod +x "$DEST_FILE" 
-#chmod 644 "$DEST_FILE" 
-
-log " Status 6 "
+log "Status 6"

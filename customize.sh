@@ -366,7 +366,7 @@ fi
 #fi
 
 # Tricky Store related functions
-popup " Patience is the key"
+#popup " Patience is the key"
  if [ -d "$mona01" ]; then
     meow " ✦ Preparing keybox downloader"
 
