@@ -13,16 +13,15 @@ kill_process() {
         echo "- Found PID(s) for $TARGET: $PID"
         kill -9 $PID
         echo "- Killed $TARGET"
-	   popup "Process killed successfully"
         echo "$TARGET process killed successfully"
     else
         echo "- $TARGET not running"
-	   popup "Process not running"
     fi
 }
 
-# Kill Google Play Services (unstable)
+# Kill all
 kill_process "com.google.android.gms.unstable"
-
-# Kill Google Play Store
+kill_process "com.google.android.gms"
 kill_process "com.android.vending"
+
+popup "Process killed successfully"

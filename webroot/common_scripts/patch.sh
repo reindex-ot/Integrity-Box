@@ -5,7 +5,7 @@ LOG="/data/adb/Integrity-Box-Logs"
 LOGFILE="$LOG/patch.log"
 TARGET_DIR="/data/adb/tricky_store"
 FILE_PATH="$TARGET_DIR/security_patch.txt"
-FILE_CONTENT="all=2025-06-05"
+FILE_CONTENT="all=2025-07-05"
 U="/data/adb/modules/integrity_box"
 
 # Execute kill script
@@ -24,7 +24,7 @@ popup() { am start -a android.intent.action.MAIN -e mona "$@" -n meow.helper/.Ma
 log "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 log " "
 log "Patch Mode : Auto"
-log "Spoofed to : 05 MAY 2025"
+log "Spoofed to : 05 JULY 2025"
 log "Applied on:  $(date '+%A %d/%m/%Y %I:%M:%S %p')"
 
 # Check if file exists to proceed

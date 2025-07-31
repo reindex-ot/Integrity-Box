@@ -73,37 +73,6 @@ log "$Q"
 log " "
 
 ####################################
-# REMOTE CONNECTIONS
-####################################
-#log "- Remote Connection Detection"
-#REMOTE_CONNECTIONS=$(netstat -antp | grep "ESTABLISHED" | grep -v "127.0.0.1")
-#if [ -n "$REMOTE_CONNECTIONS" ]; then
-#    echo "Warning: Remote Connection Detected!"
-#    log "   └─ ⚠️ Active Remote Connections:\n$REMOTE_CONNECTIONS"
-#else
-#    log "   └─ ✅ Not Found"
-#fi
-#log "$Q"
-#log " "
-
-####################################
-# TAMPERED FILES
-####################################
-log "- System File Integrity"
-TAMPERED_FILES=""
-for file in /system/lib/libc.so /system/bin/sh /system/bin/app_process; do
-    [ -f "$file" ] && md5sum "$file" | grep -qv "official_md5sum_here" && TAMPERED_FILES+="$file\n"
-done
-if [ -n "$TAMPERED_FILES" ]; then
-    echo "Detected Tampered Files ($(echo -e "$TAMPERED_FILES" | wc -l))"
-    log "   └─ ⚠️ Modified System Files:\n$TAMPERED_FILES"
-else
-    log "   └─ ✅ Not Found"
-fi
-log "$Q"
-log " "
-
-####################################
 # VPN/PROXY DETECTION
 ####################################
 log "- VPN/Proxy Detection"

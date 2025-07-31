@@ -2,7 +2,8 @@
 
 # Define paths
 PIF_JSON="/data/adb/modules/playintegrityfix/custom.pif.json"
-BACKUP_JSON="${PIF_JSON}.bak"
+BACKUP_JSON="${PIF_JSON}.tar" # Switched from .bak to .tar  PIF now reserves .bak for its own use
+BACKUP_JSON="${PIF_JSON}.tar"
 LOG_FILE="/data/adb/Integrity-Box-Logs/spoofing.log"
 
 # Popup function
@@ -29,7 +30,7 @@ fi
 if [ ! -f "$BACKUP_JSON" ]; then
     cp "$PIF_JSON" "$BACKUP_JSON"
     log "Backup created at $BACKUP_JSON"
-    popup "Backup created"
+#    popup "Backup created"
 fi
 
 # Read current spoofProps value
@@ -39,7 +40,7 @@ if [ "$current_value" = "1" ]; then
     # Restore from backup
     cp "$BACKUP_JSON" "$PIF_JSON"
     log "Spoofing restored from backup"
-    popup "Spoofing restored"
+    popup "Spoofing disabled"
 else
     # Enable spoofing: set all to 1
     sed -i \
