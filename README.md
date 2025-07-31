@@ -1,24 +1,9 @@
-[![GitHub Stars](https://m3-markdown-badges.vercel.app/stars/7/1/MeowDump/Integrity-Box)](https://github.com/MeowDump/Integrity-Box/stargazers)  
-
-_I originally wrote this code in Notepad and haven’t been very active on GitHub or GitLab. I’m uploading it here mainly to keep things transparent. Feel free to inspect the code._
-`Happy debugging!`
+`I originally wrote this code in Notepad and haven’t been very active on Git. I’m uploading it here mainly to keep things transparent. Feel free to inspect the code.`
+`Happy debugging`
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/catppuccin/catppuccin/main/assets/footers/gray0_ctp_on_line.svg?sanitize=true" alt="Catppuccin Footer" />
 </p>
-
-# Table of Contents
-
-| Section                  | Description                              |
-|--------------------------|------------------------------------------|
-| [Why I Built This Module](#why-i-built-this-module) | Introduction and purpose of the module |
-| [Module Features](#module-features)                     | Features offered by the module         |
-| [Pre-Requirements](#pre-requirements)            | Required modules before usage          |
-| [Need help?](#need-help)                         | Troubleshooting and tips                |
-| [Support](#support)                             | Support & Contribution          |
-| [Preview](#preview)                             | Screenshots and GIF previews            |
-| [Frequently Asked Questions](#frequently-asked-questions) | Answers to common questions             |
-
 
 <div align="center">
   <a href="https://github.com/MeowDump/Integrity-Box/releases" target="_blank">
@@ -63,20 +48,11 @@ _I originally wrote this code in Notepad and haven’t been very active on GitHu
 
 ## Pre-Requirements
 
-> Please make sure you have the following **modules installed** before using this:
+> Please make sure you have the following **modules installed** before using Integrity Box:
 
 - [**Play Integrity Fork**](https://github.com/osm0sis/PlayIntegrityFork/releases)
 - [**Tricky Store**](https://github.com/5ec1cff/TrickyStore/releases)
 > Make sure to properly hide root & zygisk traces, otherwise you won't be able to pass play integrity verdicts
-
-
-## Need help?
-
-NOTE: Use Action/WebUI button to report bugs/issues
-
-- Hide root properly if play integrity isn't passing for you. If you are using a custom rom, make sure you have disabled inbuilt gms spoofing. How to disable it? Well it depends on what rom you're using. Join your rom help group & ask `how to disable it` there.  
-- Avoid conflicting or unnecessary modules that expose your root environment
-
 
 ## Support
 
@@ -96,9 +72,25 @@ NOTE: Use Action/WebUI button to report bugs/issues
   <code>Donate to Developer</code>
 </p>
 
+## Notes
+
+<details>
+<summary><strong>Click to Expand</strong></summary>
+
+<br>
+NOTE: Use Action/WebUI button to report bugs/issues
+
+- Hide root properly if play integrity isn't passing for you. If you are using a custom rom, make sure you have disabled inbuilt gms spoofing. How to disable it? Well it depends on what rom you're using. Join your rom help group & ask `how to disable it` there.  
+- Avoid conflicting or unnecessary modules that expose your root environment
+
+</details>
 
 
 ## Preview
+<details>
+<summary><strong>Click here to see Preview</strong></summary>
+
+<br>
 
 1. ![](https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/1.png)  
 2. ![](https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/2.png)  
@@ -109,11 +101,18 @@ NOTE: Use Action/WebUI button to report bugs/issues
 7. ![](https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/7.gif)  
 8. ![](https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/8.png)  
 9. ![](https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/9.jpg)  
-10. ![](https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/10.png)
+10. ![](https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/10.png)  
+
+</details>
 
 
 
 ## Frequently Asked Questions
+
+<details>
+<summary><strong>Click to Expand</strong></summary>
+
+<br>
 
 > Is Meow Assistant a malware?
 
@@ -138,6 +137,7 @@ This helps you stay informed about the actions being triggered and improves the 
 
 <img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/meowassistant.png" alt="Meow Helper" width="100%">
 
+</details>
 
+[![GitHub Stars](https://m3-markdown-badges.vercel.app/stars/7/1/MeowDump/Integrity-Box)](https://github.com/MeowDump/Integrity-Box/stargazers)  
 
-[Go to Top](#table-of-contents)
