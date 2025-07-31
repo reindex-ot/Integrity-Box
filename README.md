@@ -107,7 +107,7 @@ NOTE: Use Action/WebUI button to report bugs/issues
 
 
 
-## Frequently Asked Questions
+## FAQ
 
 <details>
 <summary><strong>Click to Expand</strong></summary>
