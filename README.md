@@ -77,33 +77,28 @@
   />
 </p>
 
-
-<div align="center">
-
-<table>
+<table align="center">
   <tr>
-    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/installation.gif" width="200px"></td>
-    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/webui.gif" width="200px"></td>
-    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/webui2.gif" width="200px"></td>
+    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/installation.gif" alt="1" style="max-width: 100%; height: auto;" /></td>
+    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/webui.gif" alt="2" style="max-width: 100%; height: auto;" /></td>
+    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/webui2.gif" alt="3" style="max-width: 100%; height: auto;" /></td>
   </tr>
   <tr>
-    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/5.gif" width="200px"></td>
-    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/action.png" width="200px"></td>
-    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/prop.png" width="200px"></td>
+    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/5.gif" alt="4" style="max-width: 100%; height: auto;" /></td>
+    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/action.png" alt="5" style="max-width: 100%; height: auto;" /></td>
+    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/prop.png" alt="6" style="max-width: 100%; height: auto;" /></td>
   </tr>
   <tr>
-    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/8.png" width="200px"></td>
-    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/2.png" width="200px"></td>
-    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/3.png" width="200px"></td>
+    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/8.png" alt="7" style="max-width: 100%; height: auto;" /></td>
+    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/2.png" alt="8" style="max-width: 100%; height: auto;" /></td>
+    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/3.png" alt="9" style="max-width: 100%; height: auto;" /></td>
   </tr>
   <tr>
-    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/4.png" width="200px"></td>
-    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/6.png" width="200px"></td>
-    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/1.png" width="200px"></td>
+    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/4.png" alt="10" style="max-width: 100%; height: auto;" /></td>
+    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/module.png" alt="11" style="max-width: 100%; height: auto;" /></td>
+    <td><img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/1.png" alt="12" style="max-width: 100%; height: auto;" /></td>
   </tr>
 </table>
-
-</div>
 
 <details>
 <summary><strong>Notes</strong></summary>
