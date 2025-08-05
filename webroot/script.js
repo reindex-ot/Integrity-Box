@@ -172,7 +172,8 @@ document.addEventListener("DOMContentLoaded", () => {
           const saved = lines[1]?.trim() || "";
           const content = `
             <div style="display:flex;flex-direction:column;gap:1rem">
-              <label>Enter Verified Boot Hash:</label>
+              <label>Copy your Verified Boot Hash from key attestation or native detector app and</label>
+              <label>Paste it here:</label>
               <input id="new-hash" type="text" value="${saved}" placeholder="abcdef1234..." style="width:100%;padding:0.5rem;font-size:0.9rem;border-radius:8px;border:1px solid var(--border-color);background:var(--panel-bg);color:var(--fg);" />
               <div style="display:flex;gap:1rem;flex-wrap:wrap;">
                 <button class="btn" id="apply-hash"><span class="icon material-symbols-outlined">done</span>Apply</button>
