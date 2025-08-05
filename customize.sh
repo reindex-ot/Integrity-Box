@@ -6,7 +6,7 @@ mona03="/data/adb/Integrity-Box-Logs"
 mona04="$mona03/Installation.log"
 mona05="/data/adb/modules_update/integrity_box"
 mona06="/data/adb/susfs4ksu/sus_path.txt"
-mona07="/system/product/app/Toaster/Toaster.apk"
+mona07="Toaster.apk"
 mona08="com.helluva.product.integrity"
 mona09="$mona02/target.txt"
 mona10="/data/adb/modules/playintegrityfix"
@@ -29,6 +29,7 @@ mona26="$mona02/target.txt.bak"
 mona27="$mona03/download.log"
 mona28="popup.toast"
 mona29="/data/adb/modules"
+mona30="$mona05/$mona07"
 
 # Logger
 meow() {
@@ -39,11 +40,26 @@ meownload() {
     echo "$1" | tee -a "$mona27"
 }
 
-# Create log directory & disable auto whitelist mode by default 
+# Create files & folder 
 mkdir -p $mona03
+touch $mona03/VerifiedBootHash.txt
 touch $mona03/Installation.log
 touch "/sdcard/stop"
 meow " "
+
+# Verify ZIP
+TMPDIR="${TMPDIR:-/dev/tmp}"
+unzip -o "$ZIPFILE" 'verify.sh' -d "$TMPDIR" >&2
+if [ ! -f "$TMPDIR/verify.sh" ]; then
+  debug "- Module files are corrupted, please re-download" 0.2 "sar"
+  exit 1
+fi
+
+# Check integrity
+meow " "
+meow " ✦ Checking Module Integrity..."
+sleep 1
+sh "$TMPDIR/verify.sh" || exit 1
 
 # Internet check function
 internet() {
@@ -235,11 +251,16 @@ verify_integrity "$mona14" "$mona17" "toaster" || exit 1
 #fi
 
 # Install toaster
-#if pm install "$mona05$mona07" >/dev/null 2>&1; then
-#  popup "Hello Brother🙋‍♀️"
-#else
-#  meow "Toaster install failed."
-#fi
+
+if [ -f "$mona30" ]; then
+  if pm install "$mona30" >/dev/null 2>&1; then
+    popup "Thanks for using INTEGRITY BOX"
+  else
+    meow "Toaster installation failed."
+  fi
+else
+  meow "Toaster.apk not found"
+fi
 
 # BusyBox detector 
 busybox_finder() {
@@ -371,11 +392,6 @@ fi
     meow " ✦ Preparing keybox downloader"
 
 [ -s "$mona09" ] && cp -f "$mona09" "$mona26"
-
-if ! pm list packages | grep -q "$mona28"; then
-  meow " Baigan"
-  exit 1
-fi
 
 BUSYBOX=$(busybox_finder)
 echo " ✦ Busybox set to '$BUSYBOX'"

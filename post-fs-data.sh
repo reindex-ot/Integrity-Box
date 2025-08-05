@@ -81,3 +81,13 @@ RANDOM_NUM=$(( (RANDOM % 8) + 1 ))
 sed -i "s|^banner=.*|banner=https://raw.githubusercontent.com/MeowDump/MeowDump/590b50e067b2b50d4a2236313530fcd7670331fe/Banner/mona$RANDOM_NUM.png|" "$MODDIR/module.prop"
 
 log "Status 6"
+
+# Create temp file
+cat <<EOF > /data/adb/Integrity-Box-Logs/.verify
+SUPERMAN
+CATMAN
+IRONMAN
+SUPERMAN
+EOF
+
+log "Status 7"

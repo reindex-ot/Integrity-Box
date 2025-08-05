@@ -59,14 +59,9 @@ mv "$T" "$F"
     delete_if_exist /data/adb/Integrity-Box/openssl
     delete_if_exist /data/adb/Integrity-Box/libssl.so.3
     delete_if_exist /data/adb/modules/Integrity-Box/system/bin/openssl
-    delete_if_exist /data/data/com.termux/files/usr/bin/openssl
-    delete_if_exist /data/data/com.termux/files/lib/openssl.so
-    delete_if_exist /data/data/com.termux/files/lib/libssl.so
-    delete_if_exist /data/data/com.termux/files/lib/libcrypto.so
-    delete_if_exist /data/data/com.termux/files/lib/libssl.so.3
-    delete_if_exist /data/data/com.termux/files/lib/libcrypto.so.3
     delete_if_exist /data/local/tmp/keybox_downloader
     delete_if_exist /data/adb/modules_update/integrity_box/keybox_downloader.sh
+    delete_if_exist /data/adb/integrity_box_verify
 
     if command -v pm >/dev/null 2>&1 && pm list packages | grep -q "meow.helper"; then
         pm uninstall meow.helper >/dev/null 2>&1
