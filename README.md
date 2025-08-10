@@ -24,9 +24,10 @@
 
 -  Updates valid `keybox.xml`  
 -  Updates `target.txt` as per your TEE status
+-  Hides debug fingerprint detection
+-  Hides debug build detection
 -  Re-freshes target list on every reboot for seamless exprience
 -  Switch Shamiko & Nohello modes (via module toggle)
--  Switch NoHello modes (via module toggle)
 -  Guides users if their module setup is incorrect to pass play integrity
 -  Adds all custom ROM detection packages in the **SusFS path**  
 -  Disables EU injector by default  
@@ -42,6 +43,7 @@
 -  Shows banned keybox list
 -  Set's verified boot hash via SusFs
 -  Detects abnormal activity to help debug issues
+-  Detects flagged & spoofed apps
 -  More feature are there, check [WebUI](https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/webui.gif)
 
 ## Pre-Requirements
@@ -49,7 +51,7 @@
 > Please make sure you have the following **modules installed** before using Integrity Box:
 
 - [**Play Integrity Fork**](https://github.com/osm0sis/PlayIntegrityFork/releases)
-- [**Tricky Store**](https://github.com/5ec1cff/TrickyStore/releases)
+- [**Tricky Store**](https://github.com/5ec1cff/TrickyStore/releases) or [**Tricky Store OSS**](https://github.com/beakthoven/TrickyStoreOSS/releases)
 > Make sure to properly hide root & zygisk traces, otherwise you won't be able to pass play integrity verdicts
 
 ## Support
@@ -117,27 +119,16 @@ NOTE: Use Action/WebUI button to report bugs/issues
 
 <br>
 
-> Is Meow Assistant a malware?
+> NOTICE: THE POPUP TOASTER WILL BE DISCONTINUED IN v15
 
-### App Signing & Security Clarification
+## Why the Popup Toaster App Remains After Module Removal
 
-In earlier versions, the app was signed using a **test key**, which caused some security detectors to flag it as a potentially harmful app.
+This is because the app was installed using the `pm install <package-name>` command, while module installation, which installs the APK directly onto the system to avoid unexpected crashes due to broken installation.
 
-Starting from **Module v3+**, the app is now signed with a **private release key**.  
-🔒 Although there were **no changes in functionality**, switching to a proper key has resolved the issue, there are **no more false detections** reported.  
-**MEOW ASSISTANT IS NOW DEPRECIATED!**
+Magisk’s standard uninstall process does not support removing applications installed this way. That's why it still remains after module removal
 
-> Purpose of Meow Assistant
+## Complete Uninstallation
 
-**Meow Assistant** is built to enhance usability and transparency.
-
-It provides **popup messages** when:
-
-- You click on any option inside the **WebView**  
-- You execute any script via the **Action button**
-
-This helps you stay informed about the actions being triggered and improves the overall user experience.
-
-<img src="https://github.com/MeowDump/Integrity-Box/raw/main/DUMP/meowassistant.png" alt="Meow Helper" width="100%">
+To fully remove all components, including the Popup Toaster app, you must run the module’s uninstall script `($MODDIR/uninstall.sh)` with `su` manually or simply remove the module from your root manager and uninstall the Popup Toaster app manually.
 
 </details>
