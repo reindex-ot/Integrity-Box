@@ -10,7 +10,7 @@ log() {
 }
 
 popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
+    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
     sleep 0.5
 }
 
@@ -19,8 +19,8 @@ echo -e "$Q" >> "$L"
 echo -e " - INTEGRITY-BOX RISKY APPS DETECTION | $TIME " >> "$L"
 echo -e "$Q\n" >> "$L"
 
-# Risky Apps Detection
 log "- Risky Apps Detection"
+
 RISKY_APPS="com.rifsxd.ksunext:KernelSU_Next
 me.weishu.kernelsu:KernelSU
 com.google.android.hmal:Hide_My_Applist
@@ -35,7 +35,7 @@ com.reveny.nativecheck:Native_Detector
 icu.nullptr.nativetest:NativeTest
 io.github.huskydg.memorydetector:Memory_Detector
 org.akanework.checker:Checker
-icu.nullptr.applistdetector:Applist_Detectot
+icu.nullptr.applistdetector:Applist_Detector
 io.github.rabehx.securify:Securify
 krypton.tbsafetychecker:TB_Checker
 me.garfieldhan.holmes:Holmes
@@ -43,6 +43,7 @@ com.byxiaorun.detector:Ruru
 com.kimchangyoun.rootbeerFresh.sample:Root_Beer"
 
 FOUND_APPS=""
+SPOOFED_APPS=""
 
 for entry in $RISKY_APPS; do
     PKG=$(echo "$entry" | cut -d':' -f1)
@@ -53,14 +54,27 @@ for entry in $RISKY_APPS; do
     fi
 done
 
+# Extra check: any app with "spoofed" in version name
+for PKG in $(pm list packages -3 | cut -d':' -f2); do
+    VERSION=$(dumpsys package "$PKG" | grep versionName | head -n 1 | awk '{print $1}' | cut -d'=' -f2)
+    if echo "$VERSION" | grep -qi "spoofed"; then
+        SPOOFED_APPS="$SPOOFED_APPS\n$PKG (KSU NEXT detected)"
+    fi
+done
+
 if [ -n "$FOUND_APPS" ]; then
-    echo "Detected Risky Apps ($(echo -e "$FOUND_APPS" | wc -l))"
-    log "   └─ ⚠️ Found:\n$FOUND_APPS"
-    log "$Q"
-else
-    log "   └─ ✅ Not Found"
+    log "   └─ ⚠️ Found risky packages:\n$FOUND_APPS"
 fi
 
+if [ -n "$SPOOFED_APPS" ]; then
+    log "   └─ ⚠️ Found spoofed apps by version:\n$SPOOFED_APPS"
+fi
+
+if [ -z "$FOUND_APPS" ] && [ -z "$SPOOFED_APPS" ]; then
+    log "   └─ ✅ No risky apps found"
+fi
+
+log "$Q"
 log "- Detection Complete!\n"
 log " "
 log "🪵 TIP: Use H.M.A to hide them"

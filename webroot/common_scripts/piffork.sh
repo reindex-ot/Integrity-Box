@@ -2,21 +2,32 @@
 
 # Define paths
 PIF_JSON="/data/adb/modules/playintegrityfix/custom.pif.json"
-BACKUP_JSON="${PIF_JSON}.tar" # Switched from .bak to .tar  PIF now reserves .bak for its own use
-BACKUP_JSON="${PIF_JSON}.tar"
+BACKUP_JSON="${PIF_JSON}.backup" # Switched from .bak to .backup |  PIF now reserves .bak for its own use
 LOG_FILE="/data/adb/Integrity-Box-Logs/spoofing.log"
 
 # Popup function
 popup() {
-    am start -a android.intent.action.MAIN \
-        -e mona "$@" \
-        -n popup.toast/meow.helper.MainActivity >/dev/null 2>&1
+    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
     sleep 0.5
 }
 
 # Logger function
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$LOG_FILE"
+}
+
+kill_process() {
+    TARGET="$1"
+    PID=$(pidof "$TARGET")
+
+    if [ -n "$PID" ]; then
+        log "- Found PID(s) for $TARGET: $PID"
+        kill -9 $PID
+        log "- Killed $TARGET"
+        log "$TARGET process killed successfully"
+    else
+        log "- $TARGET not running"
+    fi
 }
 
 # Exit if config doesn't exist
@@ -34,7 +45,7 @@ if [ ! -f "$BACKUP_JSON" ]; then
 fi
 
 # Read current spoofProps value
-current_value=$(grep '"spoofProps"' "$PIF_JSON" | grep -o '[01]')
+current_value=$(grep '"spoofProvider"' "$PIF_JSON" | grep -o '[01]')
 
 if [ "$current_value" = "1" ]; then
     # Restore from backup
@@ -44,6 +55,7 @@ if [ "$current_value" = "1" ]; then
 else
     # Enable spoofing: set all to 1
     sed -i \
+        -e 's/"spoofBuild": *"[01]"/"spoofBuild": "1"/' \
         -e 's/"spoofProps": *"[01]"/"spoofProps": "1"/' \
         -e 's/"spoofProvider": *"[01]"/"spoofProvider": "1"/' \
         -e 's/"spoofSignature": *"[01]"/"spoofSignature": "1"/' \
@@ -51,3 +63,7 @@ else
     log "Spoofing enabled: all flags set to 1"
     popup "Spoofing enabled"
 fi
+
+kill_process "com.google.android.gms.unstable"
+kill_process "com.google.android.gms"
+kill_process "com.android.vending"

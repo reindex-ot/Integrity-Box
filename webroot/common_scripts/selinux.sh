@@ -5,7 +5,7 @@ LOGFILE="/data/adb/Integrity-Box-Logs/selinux.log"
 
 # Popup function using meow.helper
 popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
+    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
     sleep 0.5
 }
 

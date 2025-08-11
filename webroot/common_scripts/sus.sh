@@ -1,29 +1,22 @@
-# popup function
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
-    sleep 0.5
-}
-
 # log file path and output file path
 L="/data/adb/Integrity-Box-Logs/sus.log"
 O="/data/adb/susfs4ksu/sus_path.txt"
 
-# If file doesn't exist, notify and exit
-if [ ! -f "$O" ]; then
-  popup "susfs isn't installed ❌"
-  exit 1
-fi
-
-popup " Let Me Take Care Of This🤫"
-
-# Ensure file exists before changing permissions
-touch "$L"
-chmod 644 "$O" "$L"
 
 # Function to meow messages
 meow() {
     echo "$1" | tee -a "$L"
 }
+
+touch "$L"
+
+# If file doesn't exist, notify and exit
+if [ ! -f "$O" ]; then
+  meow "susfs isn't installed ❌"
+  exit 1
+fi
+
+chmod 644 "$O" "$L"
 
 echo "----------------------------------------------------------" >> "$L"
 echo "Logged on $(date '+%A %d/%m/%Y %I:%M:%S%p')" >> "$L"
@@ -67,6 +60,6 @@ done
 chmod 644 "$O"
 meow "- Scan complete. & saved to sus list "
 
-popup "Make it SUS🥷"
+meow "Make it SUS🥷"
 meow " "
 exit 0

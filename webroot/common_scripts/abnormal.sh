@@ -10,7 +10,7 @@ log() {
 }
 
 popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
+    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
     sleep 0.5
 }
 
@@ -71,6 +71,20 @@ DANGEROUS_PROPS=$(grep -E "ro.debuggable=1|ro.secure=0" /system/build.prop)
 [ -n "$DANGEROUS_PROPS" ] && log "   └─ ⚠️ Found:\n$DANGEROUS_PROPS" || log "   └─ ✅ Not Found"
 log "$Q"
 log " "
+
+####################################
+# REMOTE CONNECTIONS
+####################################
+#log "- Remote Connection Detection"
+#REMOTE_CONNECTIONS=$(netstat -antp | grep "ESTABLISHED" | grep -v "127.0.0.1")
+#if [ -n "$REMOTE_CONNECTIONS" ]; then
+#    echo "Warning: Remote Connection Detected!"
+#    log "   └─ ⚠️ Active Remote Connections:\n$REMOTE_CONNECTIONS"
+#else
+#    log "   └─ ✅ Not Found"
+#fi
+#log "$Q"
+#log " "
 
 ####################################
 # VPN/PROXY DETECTION

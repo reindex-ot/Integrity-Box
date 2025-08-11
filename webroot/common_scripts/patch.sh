@@ -19,7 +19,10 @@ mkdir -p "$LOG"
 log() { echo -e "$1" | tee -a "$LOGFILE"; }
 
 # Popup function
-popup() { am start -a android.intent.action.MAIN -e mona "$@" -n meow.helper/.MainActivity >/dev/null 2>&1; sleep 0.5; }
+popup() {
+    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
+    sleep 0.5
+}
 
 log "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 log " "

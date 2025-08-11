@@ -3,10 +3,12 @@
 H_FILE="/data/adb/VerifiedBootHash/VerifiedBootHash.txt"
 PROP="ro.boot.vbmeta.digest"
 LOG="/data/adb/Integrity-Box-Logs/hash.log"
+POPUP_FILE="/data/adb/Integrity-Box-Logs/popup.msg"
 
 popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
-    sleep 0.5
+    mkdir -p "$(dirname "$POPUP_FILE")"
+    echo "$@" > "$POPUP_FILE"
+    chmod 644 "$POPUP_FILE"
 }
 
 log() {
@@ -57,7 +59,7 @@ case "$1" in
     ;;
 
   clear)
-    rm -f "$H_FILE"
+#    rm -f "$H_FILE"
     resetprop -n "$PROP" ""
     log "✦ Hash cleared and property reset"
     popup "Hash cleared"

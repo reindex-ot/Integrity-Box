@@ -1,9 +1,20 @@
 popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
+    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
     sleep 0.5
 }
 
-resetprop -p -d persist.sys.pihooks.disable.gms_props
-resetprop -p -d persist.sys.pihooks.disable.gms_key_attestation_block
-resetprop -p -d setprop persist.sys.pihooks.disable.gms_key_attestation_block
-popup "Switched back to default settings"
+# Only set the properties if they already exist
+if getprop persist.sys.pihooks.disable.gms_props >/dev/null 2>&1; then
+    su -c setprop persist.sys.pihooks.disable.gms_props true
+fi
+
+if getprop persist.sys.pihooks.disable.gms_key_attestation_block >/dev/null 2>&1; then
+    su -c setprop persist.sys.pihooks.disable.gms_key_attestation_block true
+fi
+
+# Delete related props safely
+su -c 'getprop | grep -Ei "pihook|pixelprops|gms|pi" | sed -E "s/^\[(.*)\]:.*/\1/" | while read -r prop; do
+    resetprop -p -d "$prop"
+done'
+
+popup "Done, Reopen detector to check"

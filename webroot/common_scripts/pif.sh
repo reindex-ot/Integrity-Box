@@ -13,7 +13,7 @@ LOG="/data/adb/Integrity-Box-Logs/pif.log"
 KILL="$MODDIR/webroot/common_scripts/kill.sh"
 
 popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity >/dev/null
+    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
     sleep 0.5
 }
 

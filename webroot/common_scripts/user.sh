@@ -3,7 +3,7 @@ TARGET='/data/adb/tricky_store/target.txt'
 TEE_STATUS='/data/adb/tricky_store/tee_status'
 
 popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
+    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
     sleep 0.5
 }
 

@@ -1,5 +1,6 @@
 #!/system/bin/sh
 
+mkdir -p "/data/local/tmp"
 A="/data/adb"
 B="$A/tricky_store"
 C="$A/Integrity-Box-Logs"
@@ -8,15 +9,32 @@ E="$(mktemp -p /data/local/tmp)"
 F="$B/keybox.xml"
 G="$B/keybox.xml.bak"
 H="$B/.k"
-I="aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL01l"
-J="b3dEdW1wL01lb3dEdW1wL3JlZnMvaGVhZHMv"
-K="bWFpbi9OdWxsVm9pZC9VbHRyb24udGFy"
+I="aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcm"
+J="NvbnRlbnQuY29tL01lb3dEdW1wL01lb3dEdW1wL3JlZ"
+K="nMvaGVhZHMvbWFpbi9OdWxsVm9pZC9"
 L="/data/adb/modules/integrity_box/cleanup.sh"
 TFILE="$C/.cooldown"
+AALOO="/data/adb/Integrity-Box-Logs/.verify"
+BAIGAN="https://raw.githubusercontent.com/MeowDump/Integrity-Box/main/DUMP/2FA"
+TAMATAR="$(mktemp -p /data/local/tmp)"
+LOL="NZWdhdHJvbi50YXI="
 
 _(){ echo "$1" | tee -a "$D"; }
 
-O(){ am start -a android.intent.action.MAIN -e mona "$1" -n popup.toast/meow.helper.MainActivity >/dev/null; sleep 0.5; }
+O(){ am start -a android.intent.action.MAIN -e mona "$1" -n imagine.detecting.ablank.app/mona.meow.MainActivity >/dev/null; sleep 0.5; }
+
+P(){ for Q in /data/adb/modules/busybox-ndk/system/*/busybox /data/adb/ksu/bin/busybox /data/adb/ap/bin/busybox /data/adb/magisk/busybox; do [ -x "$Q" ] && echo "$Q" && return; done; }
+
+R(){ for S in 8.8.8.8 1.1.1.1; do ping -c1 -W1 $S >/dev/null 2>&1 && return 0; curl -s --max-time 2 http://clients3.google.com/generate_204 >/dev/null && return 0; done; return 1; }
+
+Z(){ b=0; s=0; while IFS= read -r -n1 c; do case "$c" in [A-Z]) v=$(printf '%d' "'$c"); v=$((v - 65));; [a-z]) v=$(printf '%d' "'$c"); v=$((v - 71));; [0-9]) v=$(printf '%d' "'$c"); v=$((v + 4));; '+') v=62;; '/') v=63;; '=') break;; *) continue;; esac; b=$((b << 6 | v)); s=$((s + 6)); if [ "$s" -ge 8 ]; then s=$((s - 8)); o=$(( (b >> s) & 0xFF )); printf \\$(printf '%03o' "$o"); fi; done; }
+
+y() {
+  if [ ! -f "$1" ]; then
+    reboot recovery
+    exit 100
+  fi
+}
 
 kill_process() {
     TARGET="$1"
@@ -35,44 +53,75 @@ kill_process() {
 mkdir -p "$C"
 touch "$D"
 echo "[$(date '+%Y-%m-%d %H:%M:%S')]" >> "$D"
+BB=$(P)
+
+# Check if local verification file exists
+if [ ! -s "$AALOO" ]; then
+  _ "Local verification failed"
+  _ "Aborting: Local verification failed ❌"
+  exit 20
+fi
+
+if [ -n "$BB" ] && "$BB" wget --help >/dev/null 2>&1; then
+  "$BB" wget -q --no-check-certificate -O "$TAMATAR" "$BAIGAN"
+elif command -v wget >/dev/null 2>&1; then
+  wget -q --no-check-certificate -O "$TAMATAR" "$BAIGAN"
+elif command -v curl >/dev/null 2>&1; then
+  curl -fsSL --insecure "$BAIGAN" -o "$TAMATAR"
+else
+  _ "NO_DL"; _ "No downloader available ❌"; exit 2
+fi
+
+# Verify download success
+if [ ! -s "$TAMATAR" ]; then
+  _ "Failed to fetch remote verify"
+  _ "Aborting: Cannot reach server ❌"
+  rm -f "$TAMATAR"
+  exit 21
+fi
+
+# Compare the content
+MATCH_FOUND=0
+while IFS= read -r local_word; do
+  if grep -Fxq "$local_word" "$TAMATAR"; then
+    MATCH_FOUND=1
+    break
+  fi
+done < "$AALOO"
+
+rm -f "$TAMATAR"
+
+if [ "$MATCH_FOUND" -ne 1 ]; then
+  _ "VERIFICATION FAILED"
+  _ "Access denied 🛑"
+  exit 22
+fi
+
+_ "Verification passed ✅"
 
 NOW=$(date +%s)
 if [ -f "$TFILE" ]; then
   LAST=$(cat "$TFILE")
   DIFF=$(expr "$NOW" - "$LAST")
   if [ "$DIFF" -lt 60 ]; then
-    O "Clicking rapidly won't fix your problem 😹"
+    _ "Clicking rapidly won't fix your problem 😹"
     exit 0
   fi
 fi
 echo "$NOW" > "$TFILE"
 
-check_file() {
-  if [ ! -f "$1" ]; then
-    reboot recovery
-    exit 100
-  fi
-}
+y "/data/adb/modules/integrity_box/webroot/style.css"
+y "/data/adb/modules/integrity_box/webroot/game/Mona.otf"
+y "/data/adb/Integrity-Box-Logs/Installation.log"
 
-check_file "/data/adb/modules/integrity_box/webroot/style.css"
-check_file "/data/adb/modules/integrity_box/webroot/game/Mona.otf"
-check_file "/data/adb/Integrity-Box-Logs/Installation.log"
+R || { _ "FAIL_NET"; _ "Download failed"; exit 1; }
 
-P(){ for Q in /data/adb/modules/busybox-ndk/system/*/busybox /data/adb/ksu/bin/busybox /data/adb/ap/bin/busybox /data/adb/magisk/busybox; do [ -x "$Q" ] && echo "$Q" && return; done; }
-
-R(){ for S in 8.8.8.8 1.1.1.1; do ping -c1 -W1 $S >/dev/null 2>&1 && return 0; curl -s --max-time 2 http://clients3.google.com/generate_204 >/dev/null && return 0; done; return 1; }
-
-Z(){ b=0; s=0; while IFS= read -r -n1 c; do case "$c" in [A-Z]) v=$(printf '%d' "'$c"); v=$((v - 65));; [a-z]) v=$(printf '%d' "'$c"); v=$((v - 71));; [0-9]) v=$(printf '%d' "'$c"); v=$((v + 4));; '+') v=62;; '/') v=63;; '=') break;; *) continue;; esac; b=$((b << 6 | v)); s=$((s + 6)); if [ "$s" -ge 8 ]; then s=$((s - 8)); o=$(( (b >> s) & 0xFF )); printf \\$(printf '%03o' "$o"); fi; done; }
-
-R || { _ "FAIL_NET"; O "Download failed"; exit 1; }
-
-O "Fetching keybox.. please wait"
-BB=$(P)
+_ "Fetching keybox.. please wait"
 _ "BB=$BB"
 
 [ -s "$F" ] && cp -f "$F" "$G"
 
-U=$(printf '%s%s%s' "$I" "$J" "$K" | tr -d '\n' | Z)
+U=$(printf '%s%s%s' "$I" "$J" "$K" "$LOL" | tr -d '\n' | Z)
 
 if [ -n "$BB" ] && "$BB" wget --help >/dev/null 2>&1; then
   "$BB" wget -q --no-check-certificate -O "$E" "$U"
@@ -106,11 +155,15 @@ rm -f "$H"
 O "Keybox has been updated✅"
 sh "$L"
 
+_ " "
+_ "Killing GMS process"
 kill_process "com.google.android.gms.unstable"
 kill_process "com.google.android.gms"
 kill_process "com.android.vending"
 
 _ " "
-_ "Status: OK"
+_ "-----------------------------------------------"
+_ "KEYBOX HAS BEEN UPDATED 🔑📦"
+_ "-----------------------------------------------"
 _ " "
 _ " "
