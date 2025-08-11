@@ -51,7 +51,7 @@
 > Please make sure you have the following **modules installed** before using Integrity Box:
 
 - [**Play Integrity Fork**](https://github.com/osm0sis/PlayIntegrityFork/releases)
-- [**Tricky Store**](https://github.com/5ec1cff/TrickyStore/releases) or [**Tricky Store OSS**](https://github.com/beakthoven/TrickyStoreOSS/releases)
+- [**Tricky Store**](https://github.com/5ec1cff/TrickyStore/releases)
 > Make sure to properly hide root & zygisk traces, otherwise you won't be able to pass play integrity verdicts
 
 ## Support
