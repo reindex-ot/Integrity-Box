@@ -1,57 +1,123 @@
 const MODDIR = "/data/adb/modules/integrity_box/webroot/common_scripts";
 const PROP = `/data/adb/modules/integrity_box/module.prop`;
-
-const modalBackdrop = document.getElementById("modal-backdrop");
-const modalTitle = document.getElementById("modal-title");
-const modalOutput = document.getElementById("modal-output");
-const modalClose = document.getElementById("modal-close");
-const modalContent = document.getElementById("modal-content");
+let modalBackdrop = document.getElementById("modal-backdrop");
+let modalTitle = document.getElementById("modal-title");
+let modalOutput = document.getElementById("modal-output");
+let modalClose = document.getElementById("modal-close");
+let modalContent = document.getElementById("modal-content");
 
 function runShell(command) {
+  if (!command) return Promise.reject(new Error("No command provided"));
   if (typeof ksu !== "object" || typeof ksu.exec !== "function") {
-    return Promise.reject("KernelSU JavaScript API not available.");
+    return Promise.reject(new Error("KernelSU JavaScript API not available."));
   }
-  const cb = `cb_${Date.now()}`;
+  const cb = `cb_${Date.now()}_${Math.floor(Math.random()*10000)}`;
   return new Promise((resolve, reject) => {
     window[cb] = (code, stdout, stderr) => {
-      delete window[cb];
-      code === 0 ? resolve(stdout) : reject(new Error(stderr || "Shell command failed"));
+      try {
+        const out = String(stdout || "");
+        const err = String(stderr || "");
+        if (Number(code) === 0) resolve(out.replace(/\r/g, ""));
+        else reject(new Error(err || out || "Shell command failed"));
+      } finally {
+        try { delete window[cb]; } catch(e){}
+      }
     };
-    ksu.exec(command, "{}", cb);
+    try {
+      ksu.exec(command, "{}", cb);
+    } catch (e) {
+      try { delete window[cb]; } catch(e){}
+      reject(e);
+    }
   });
 }
 
-function popup(msg) {
-  return runShell(`am start -a android.intent.action.MAIN -e mona "${msg}" -n popup.toast/.MainActivity`);
+function popup(msg, type) {
+  document.querySelectorAll(".webui-popup").forEach(el => el.remove());
+  const n = document.createElement("div");
+  n.className = "webui-popup";
+  n.textContent = msg || "";
+
+  const themeAccent = getComputedStyle(document.documentElement)
+    .getPropertyValue("--accent")
+    .trim();
+
+  const colorMap = {
+    error: getComputedStyle(document.documentElement).getPropertyValue("--error").trim(),
+    success: getComputedStyle(document.documentElement).getPropertyValue("--meowna").trim(),
+    info: "#1565c0",
+    warn: "#ff8f00"
+  };
+  const bg = type && colorMap[type] ? colorMap[type] : themeAccent;
+
+  Object.assign(n.style, {
+    position: "fixed",
+    top: "-70px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    background: bg,
+    color: "#fff",
+    padding: "0.8rem 1.2rem",
+    borderRadius: "8px",
+    boxShadow: "0 6px 18px rgba(0,0,0,0.35)",
+    fontSize: "0.95rem",
+    fontWeight: "600",
+    zIndex: "99999",
+    transition: "top 0.36s ease, opacity 0.36s ease",
+    opacity: "0",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    maxWidth: "90vw"
+  });
+
+  document.body.appendChild(n);
+  requestAnimationFrame(() => {
+    n.style.top = "20px";
+    n.style.opacity = "1";
+  });
+  setTimeout(() => {
+    n.style.top = "-70px";
+    n.style.opacity = "0";
+    setTimeout(() => n.remove(), 420);
+  }, 2500);
 }
 
-function openModal(title, content, fullscreen = false) {
-  modalTitle.textContent = title;
-  modalOutput.innerHTML = content || "Loading...";
-  modalBackdrop.classList.remove("hidden");
-
+function openModal(title, content, fullscreen) {
+  modalBackdrop = modalBackdrop || document.getElementById("modal-backdrop");
+  modalTitle = modalTitle || document.getElementById("modal-title");
+  modalOutput = modalOutput || document.getElementById("modal-output");
+  modalContent = modalContent || document.getElementById("modal-content");
+  if (modalTitle) modalTitle.textContent = title || "";
+  if (modalOutput) modalOutput.innerHTML = content ?? "Loading...";
+  if (modalBackdrop) modalBackdrop.classList.remove("hidden");
   if (fullscreen) {
-    modalBackdrop.classList.add("fullscreen");
-    modalContent.classList.add("fullscreen");
-    modalOutput.classList.add("fullscreen");
+    modalBackdrop?.classList.add("fullscreen");
+    modalContent?.classList.add("fullscreen");
+    modalOutput?.classList.add("fullscreen");
   } else {
-    modalBackdrop.classList.remove("fullscreen");
-    modalContent.classList.remove("fullscreen");
-    modalOutput.classList.remove("fullscreen");
+    modalBackdrop?.classList.remove("fullscreen");
+    modalContent?.classList.remove("fullscreen");
+    modalOutput?.classList.remove("fullscreen");
   }
 }
 
 function closeModal() {
-  modalBackdrop.classList.add("hidden");
+  modalBackdrop = modalBackdrop || document.getElementById("modal-backdrop");
+  modalBackdrop?.classList.add("hidden");
 }
 
 async function getModuleName() {
   try {
     const name = await runShell(`grep '^name=' ${PROP} | cut -d= -f2`);
-    document.getElementById("module-name").textContent = name.trim();
-    document.title = name.trim();
+    const t = (name || "").trim() || "integrity_box";
+    const el = document.getElementById("module-name");
+    if (el) el.textContent = t;
+    document.title = t;
   } catch {
-    document.getElementById("module-name").textContent = "integrity_box";
+    const el = document.getElementById("module-name");
+    if (el) el.textContent = "integrity_box";
+    document.title = "integrity_box";
   }
 }
 
@@ -59,235 +125,364 @@ async function updateDashboard() {
   const statusWhitelist = document.getElementById("status-whitelist");
   const statusGms = document.getElementById("status-gms");
   const statusSusfs = document.getElementById("status-susfs");
-
   try {
     await runShell("[ -f /data/adb/nohello/whitelist ] || [ -f /data/adb/shamiko/whitelist ]");
-    statusWhitelist.textContent = "Enabled";
-    statusWhitelist.className = "status-indicator enabled";
+    if (statusWhitelist) { statusWhitelist.textContent = "Enabled"; statusWhitelist.className = "status-indicator enabled"; }
   } catch {
-    statusWhitelist.textContent = "Disabled";
-    statusWhitelist.className = "status-indicator disabled";
+    if (statusWhitelist) { statusWhitelist.textContent = "Disabled"; statusWhitelist.className = "status-indicator disabled"; }
   }
-
   try {
-    const gmsProp = await runShell("getprop persist.sys.pihooks.disable.gms_props");
-    statusGms.textContent = gmsProp.trim() === "true" ? "Disabled" : "Enabled";
-    statusGms.className = gmsProp.trim() === "true" ? "status-indicator enabled" : "status-indicator enabled";
+    const gmsProp = await runShell("getprop persist.sys.pihooks.disable.gms_props || echo ''");
+    const trimmed = (gmsProp || "").trim();
+    if (statusGms) { statusGms.textContent = trimmed === "true" ? "Disabled" : "Enabled"; statusGms.className = "status-indicator enabled"; }
   } catch {
-    statusGms.textContent = "Unknown";
-    statusGms.className = "status-indicator";
+    if (statusGms) { statusGms.textContent = "Unknown"; statusGms.className = "status-indicator"; }
   }
-
   try {
     await runShell("[ -d /data/adb/modules/susfs4ksu ]");
-    statusSusfs.textContent = "Detected";
-    statusSusfs.className = "status-indicator enabled";
+    if (statusSusfs) { statusSusfs.textContent = "Detected"; statusSusfs.className = "status-indicator enabled"; }
   } catch {
-    statusSusfs.textContent = "N/A";
-    statusSusfs.className = "status-indicator disabled";
+    if (statusSusfs) { statusSusfs.textContent = "N/A"; statusSusfs.className = "status-indicator disabled"; }
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  getModuleName();
-  updateDashboard();
+function buildIntroSubtext() {
+  const el = document.getElementById("intro-subtext");
+  if (!el) return;
+  const quotes = ["Welcome Back","Let's Go","Stay Ready","Good Day","Trust Yourself","Break Limits","Breathe Fire","Sacrifice Comfort","Accept Everything","Fear Nothing","Grow Daily","Dream Relentlessly","Think Deep","Be Nothing","Truth Remains","Die-Awake, Not-Afraid","Think Clear","Face Fear","Pain Teaches","Break Chains","Level Up"];
+  const randomQuote = quotes[Math.floor(Math.random()*quotes.length)];
+  const words = randomQuote.split(" ");
+  el.innerHTML = "";
+  words.forEach((w,i) => {
+    const s = document.createElement("span");
+    s.textContent = w;
+    s.style.opacity = 0;
+    s.style.display = "block";
+    s.style.fontWeight = "bold";
+    s.style.fontSize = "4.5rem";
+    s.style.textAlign = "center";
+    s.style.transition = "opacity 0.3s ease-in-out";
+    s.style.animation = `fadeInWord 0.4s ease forwards ${i * 0.5}s`;
+    el.appendChild(s);
+  });
+}
 
-  const sparkleContainer = document.querySelector('.sparkle-container');
-  if (sparkleContainer) {
-    for (let i = 0; i < 40; i++) {
-      const sparkle = document.createElement('div');
-      sparkle.classList.add('sparkle');
-      sparkle.style.top = `${Math.random() * 100}%`;
-      sparkle.style.left = `${Math.random() * 100}%`;
-      sparkle.style.animationDelay = `${Math.random() * 3}s`;
-      sparkleContainer.appendChild(sparkle);
-    }
-  }
+function typeIntroText(text) {
+  const el = document.querySelector(".intro-text");
+  if (!el) return;
+  el.textContent = "";
+  let i = 0;
+  const t = setInterval(() => {
+    el.textContent += text.charAt(i) || "";
+    i++;
+    if (i >= text.length) clearInterval(t);
+  }, 40);
+}
 
-  const introSubtext = document.getElementById("intro-subtext");
-  if (introSubtext) {
-    const quotes = [
-      "Indeed, With Hardship Comes Ease",
-      "Work Hard Dream Big",
-      "Stay Focused Never Give Up",
-      "Believe In Yourself",
-      "Success Starts With Effort",
-      "Discipline Is Greater Than Motivation",
-      "Dream It Wish It Do It",
-      "Your Mind Is Your Power",
-      "Grind Quietly, Rise Loudly",
-      "Hold the Vision. Trust the Process",
-      "Let Silence Build Your Legacy",
-      "There's No Tomorrow",
-      "Fear Only the Eternal",
-      "Whoever Remains Silent Is Saved",
-      "Die Before You Die",
-      "Die Awake, Not Afraid",
-      "Turn Pain Into Purpose",
-	 "No Peace Without Struggle",
-	 "A Clean Heart Fears Nothing",
-	 "Be Water, Not the Wave",
-	 "Darkness Teaches Light"
-    ];
-
-    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-    const words = randomQuote.split(" ");
-
-    introSubtext.innerHTML = "";
-    words.forEach((word, index) => {
-      const span = document.createElement("span");
-      span.textContent = word;
-      span.style.opacity = 0;
-      span.style.display = "block";
-      span.style.fontWeight = "bold";
-      span.style.fontSize = "5.2rem";
-      span.style.textAlign = "center";
-      span.style.transition = "opacity 0.3s ease-in-out";
-      span.style.animation = `fadeInWord 0.4s ease forwards ${index * 0.5}s`;
-      introSubtext.appendChild(span);
+async function _loadLangModule(lang) {
+  try {
+    const mod = await import(`./lang/${lang}.js`);
+    return { translations: mod.translations ?? (mod.default && mod.default.translations) ?? {}, buttonGroups: mod.buttonGroups ?? (mod.default && mod.default.buttonGroups) ?? {}, buttonOrder: mod.buttonOrder ?? (mod.default && mod.default.buttonOrder) ?? [] };
+  } catch (e) {
+    return new Promise((resolve) => {
+      const prev = document.getElementById("lang-script");
+      if (prev) prev.remove();
+      window.translations = undefined;
+      window.buttonGroups = undefined;
+      window.buttonOrder = undefined;
+      const s = document.createElement("script");
+      s.id = "lang-script";
+      s.src = `lang/${lang}.js`;
+      s.onload = () => setTimeout(() => resolve({ translations: window.translations ?? {}, buttonGroups: window.buttonGroups ?? {}, buttonOrder: window.buttonOrder ?? [] }), 60);
+      s.onerror = () => resolve({ translations: {}, buttonGroups: {}, buttonOrder: [] });
+      document.head.appendChild(s);
     });
   }
+}
 
+function _getLabelFromTranslations(translations, lang, index, scriptName, fallback) {
+  if (!translations) return fallback;
+  if (Array.isArray(translations) && translations[index]) return translations[index];
+  if (typeof translations === "object") {
+    if (translations[lang] && Array.isArray(translations[lang]) && translations[lang][index]) return translations[lang][index];
+    if (translations[scriptName]) return translations[scriptName];
+    if (translations[index]) return translations[index];
+  }
+  return fallback;
+}
+
+function getButtonText(btn) {
+  let text = "";
+  btn.childNodes.forEach(n => {
+    if (n.nodeType === Node.TEXT_NODE) text += n.textContent;
+    else if (n.nodeType === 1 && !n.classList.contains("icon") && !n.classList.contains("spinner")) text += n.textContent || "";
+  });
+  return (text || "").trim();
+}
+
+function setButtonLabel(btn, label) {
+  const icon = btn.querySelector(".icon");
+  const spinner = btn.querySelector(".spinner");
+  Array.from(btn.childNodes).forEach(n => { if (n.nodeType === Node.TEXT_NODE) n.remove(); });
+  const textNode = document.createTextNode(" " + label);
+  if (icon && icon.parentNode) icon.parentNode.insertBefore(textNode, icon.nextSibling);
+  else if (spinner && spinner.parentNode) spinner.parentNode.insertBefore(textNode, spinner);
+  else btn.appendChild(textNode);
+}
+
+async function changeLanguage(lang) {
+  if (!lang) lang = localStorage.getItem("lang") || "en";
+  localStorage.setItem("lang", lang);
+  document.documentElement.setAttribute("dir", (lang === "ar" || lang === "ur") ? "rtl" : "ltr");
+  const { translations, buttonGroups, buttonOrder } = await _loadLangModule(lang);
+  document.querySelectorAll(".group-title").forEach(title => {
+    const originalKey = title.dataset.key || title.textContent.trim();
+    if (!title.dataset.key) title.dataset.key = originalKey;
+    let newTitle = null;
+    if (buttonGroups && buttonGroups[originalKey]) {
+      if (typeof buttonGroups[originalKey] === "string") newTitle = buttonGroups[originalKey];
+      else if (buttonGroups[originalKey][lang]) newTitle = buttonGroups[originalKey][lang];
+    }
+    if (newTitle) title.textContent = newTitle;
+  });
+  const labelsArray = Array.isArray(translations) ? translations : (translations[lang] && Array.isArray(translations[lang]) ? translations[lang] : null);
+  if (Array.isArray(buttonOrder) && buttonOrder.length > 0) {
+    buttonOrder.forEach((scriptName, index) => {
+      const btn = document.querySelector(`.btn[data-script='${scriptName}']`);
+      if (!btn) return;
+      if (!btn.dataset.origLabel) btn.dataset.origLabel = getButtonText(btn) || scriptName;
+      const fallback = btn.dataset.origLabel || scriptName;
+      const label = _getLabelFromTranslations(translations, lang, index, scriptName, labelsArray && labelsArray[index] ? labelsArray[index] : fallback);
+      setButtonLabel(btn, label);
+    });
+  } else {
+    const btns = Array.from(document.querySelectorAll(".btn"));
+    btns.forEach((btn, index) => {
+      const scriptName = btn.dataset.script;
+      if (!btn.dataset.origLabel) btn.dataset.origLabel = getButtonText(btn) || scriptName;
+      const fallback = btn.dataset.origLabel || scriptName;
+      const label = _getLabelFromTranslations(translations, lang, index, scriptName, labelsArray && labelsArray[index] ? labelsArray[index] : fallback);
+      setButtonLabel(btn, label);
+    });
+  }
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (!key) return;
+    if (translations && translations[key]) el.innerText = translations[key];
+    else if (translations[lang] && translations[lang][key]) el.innerText = translations[lang][key];
+  });
+}
+
+const SCRIPT_POPUPS = {
+  "kill.sh": { start: "Process Killed Successfully", success: "Process Killed Successfully", type: "info" },
+  "xiaomi.sh": { start: "Meow", success: "Meow", type: "info" },
+  "derpfest.sh": { start: "Meow", success: "Meow", type: "info" },
+  "helluva.sh": { start: "Meow", success: "Meow", type: "info" },
+  "pixelos.sh": { start: "Meow", success: "Meow", type: "info" },
+  "vending.sh": { start: "Open playstore & Check/FIX", success: "Open playstore & Check/FIX", type: "info" },  
+  "user.sh": { start: "I've added all user apps", success: "I've added all user apps", type: "info" },
+  "systemuser.sh": { start: "I've added all apps", success: "I've added all apps", type: "info" },
+  "sus.sh": { start: "Make it SUS🥷", success: "Make it SUS🥷", type: "info" },
+  "stop.sh": { start: "Switched to Blacklist Mode", success: "Switched to Blacklist Mode", type: "info" },
+  "start.sh": { start: "Switched to Whitelist Mode", success: "Switched to Whitelist Mode", type: "info" },
+  "spoof.sh": { start: "Done! Click again to revert changes", success: "Done! Click again to revert changes", type: "info" },
+  "setprop.sh": { start: "Switched back to default settings", success: "Switched back to default settings", type: "info" },
+  "resize.sh": { start: "Done! Click again to revert changes", success: "Done! Click again to revert changes", type: "info" },
+  "resetprop.sh": { start: "Done, Reopen detector to check", success: "Done, Reopen detector to check", type: "info" },
+  "report.sh": { start: "Contacting Developer", success: "Contacting Developer", type: "info" },
+  "prop.sh": { start: "Prop Dump Completed", success: "Prop Dump Completed", type: "info" },
+  "piffork.sh": { start: "Done! Click again to revert changes", success: "Done! Click again to revert changes", type: "info" },
+  "pif.sh": { start: "Done!", success: "Done!", type: "info" },
+  "patch.sh": { start: "Done! Click again to revert changes", success: "Done! Click again to revert changes", type: "info" },
+  "module_info.sh": { start: "Read it properly", success: "Read it properly", type: "info" },
+  "modal.sh": { start: "Done! Click again to revert changes", success: "Done! Click again to revert changes", type: "info" },
+  "keybox.sh": { start: "Okay Buddy", success: "Okay Buddy", type: "info" },
+  "key.sh": { start: "Keybox has been updated✅", success: "Keybox has been updated✅", type: "info" },
+  "issue.sh": { start: "Report your problem here", success: "Report your problem here", type: "info" },
+  "info.sh": { start: "Redirecting to Source Code repo", success: "Redirecting to Source Code repo", type: "info" },
+  "banned.sh": { start: "Redirecting to Google Revoked List", success: "Redirecting to Google Revoked List", type: "info" },
+  "app.sh": { start: "Detection Complete", success: "Detection Complete", type: "info" },
+  "aosp.sh": { start: "Switched to AOSP keybox", success: "Switched to AOSP keybox", type: "info" },
+  "abnormal.sh": { start: "Detection Complete!", success: "Detection Complete!", type: "info" },
+  "meowverse.sh": { start: "REDIRECTING TO TELEGRAM", success: "Redirected to Telegram", type: "info" },
+  "meowdump.sh": { start: "Redirecting To Telegram", success: "Redirected to Telegram", type: "info" },
+  "support": { start: "Become a Supporter", success: "Become a Supporter", type: "info" },
+  "selinux.sh": { start: "SELinux Status Changed", success: "SELinux Status Changed", type: "info" },
+  "boot_hash.sh": { start: "Paste it here", success: "Boot hash operation complete", type: "success" },
+  "game.sh": { start: "LAUNCHING GAME", success: "Game launched", type: "info" }
+};
+
+document.addEventListener("DOMContentLoaded", async () => {
+  modalBackdrop = document.getElementById("modal-backdrop");
+  modalTitle = document.getElementById("modal-title");
+  modalOutput = document.getElementById("modal-output");
+  modalClose = document.getElementById("modal-close");
+  modalContent = document.getElementById("modal-content");
+  await getModuleName();
+  await updateDashboard();
+  const sparkleContainer = document.querySelector('.sparkle-container');
+  if (sparkleContainer) {
+    sparkleContainer.innerHTML = "";
+    for (let i = 0; i < 40; i++) {
+      const s = document.createElement("div");
+      s.classList.add("sparkle");
+      s.style.top = `${Math.random() * 100}%`;
+      s.style.left = `${Math.random() * 100}%`;
+      s.style.animationDelay = `${Math.random() * 3}s`;
+      sparkleContainer.appendChild(s);
+    }
+  }
+  buildIntroSubtext();
+  const introTextEl = document.querySelector('.intro-text');
+  if (introTextEl) {
+    const nameEl = document.getElementById("module-name");
+    const baseText = (nameEl && nameEl.textContent.trim()) || "Integrity-Box";
+    typeIntroText(baseText);
+  }
   setTimeout(() => {
-    const overlay = document.getElementById("intro-overlay");
-    if (overlay) overlay.remove();
-  }, 3000);
+    const ov = document.getElementById("intro-overlay");
+    if (ov) ov.remove();
+  }, 1500);
 
   document.querySelectorAll(".btn").forEach((btn) => {
+    if (btn._handlerAttached) return;
+    btn._handlerAttached = true;
+    if (!btn.dataset.origLabel) btn.dataset.origLabel = getButtonText(btn) || (btn.dataset.script || "");
     btn.addEventListener("click", async () => {
       const script = btn.dataset.script;
       const type = btn.dataset.type;
-      const command = `sh ${MODDIR}/${script}`;
+      const command = script ? `sh ${MODDIR}/${script}` : null;
       btn.classList.add("loading");
-
+      const mapping = SCRIPT_POPUPS[script] || SCRIPT_POPUPS[script.replace(/\.sh$/,'')] || { start: `Running ${btn.dataset.origLabel || script}`, success: `Finished ${btn.dataset.origLabel || script}`, type: "info" };
       try {
+        popup(mapping.start, mapping.type);
         if (type === "scanner") {
-          openModal(btn.innerText.trim(), "Running scan...", true);
-          const output = await runShell(command);
-          modalOutput.innerHTML = (output || "Script executed with no output.").replace(/\n/g, "<br>");
-          setTimeout(closeModal, 10000);
+          openModal(btn.dataset.origLabel || btn.innerText.trim(), "Running scan...", true);
+          try {
+            const output = await runShell(command);
+            modalOutput.innerHTML = (output || "Script executed with no output.").replace(/\n/g, "<br>");
+            popup(mapping.success, "success");
+          } catch (err) {
+            modalOutput.innerText = `Error executing script:\n\n${err.message || String(err)}`;
+            popup(`Error: ${err.message || String(err)}`, "error");
+          } finally {
+          }
         } else if (type === "hash") {
-          const output = await runShell(`sh ${MODDIR}/boot_hash.sh get`);
-          const lines = output.trim().split(/\r?\n/);
-          const saved = lines[1]?.trim() || "";
-          const content = `
-            <div style="display:flex;flex-direction:column;gap:1rem">
-              <label>Copy your Verified Boot Hash from key attestation or native detector app and</label>
-              <label>Paste it here:</label>
-              <input id="new-hash" type="text" value="${saved}" placeholder="abcdef1234..." style="width:100%;padding:0.5rem;font-size:0.9rem;border-radius:8px;border:1px solid var(--border-color);background:var(--panel-bg);color:var(--fg);" />
-              <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-                <button class="btn" id="apply-hash"><span class="icon material-symbols-outlined">done</span>Apply</button>
-                <button class="btn" id="reset-hash"><span class="icon material-symbols-outlined">restart_alt</span>Reset</button>
-              </div>
-            </div>
-          `;
+          const output = await runShell(`sh ${MODDIR}/boot_hash.sh get`).catch(()=>"");
+          const lines = (output || "").trim().split(/\r?\n/);
+          const saved = (lines[1] || "").trim();
+          const content = `<div style="display:flex;flex-direction:column;gap:1rem"><label>Copy your Verified Boot Hash from key attestation or native detector app and</label><label>Paste it here:</label><input id="new-hash" type="text" value="${saved}" placeholder="abcdef1234..." style="width:100%;padding:0.5rem;font-size:0.9rem;border-radius:8px;border:1px solid var(--border-color);background:var(--panel-bg);color:var(--fg);" /><div style="display:flex;gap:1rem;flex-wrap:wrap;"><button class="btn" id="apply-hash"><span class="icon material-symbols-outlined">done</span>Apply</button><button class="btn" id="reset-hash"><span class="icon material-symbols-outlined">restart_alt</span>Reset</button></div></div>`;
           openModal("Set Verified Boot Hash", content, true);
           setTimeout(() => {
             document.getElementById("apply-hash")?.addEventListener("click", async () => {
-              const hash = document.getElementById("new-hash").value.trim();
+              const hash = (document.getElementById("new-hash")?.value || "").trim();
               const cmd = hash ? `sh ${MODDIR}/boot_hash.sh set ${hash}` : `sh ${MODDIR}/boot_hash.sh clear`;
               try {
                 await runShell(cmd);
-                popup("Boot hash applied ✅");
+                popup("Boot hash applied ✅", "success");
               } catch {
-                popup("Failed to apply hash ❌");
+                popup("SusFS dir not found ❌", "error");
               } finally {
-                await runShell(`sh ${MODDIR}/resethash.sh clear`);
+                await runShell(`sh ${MODDIR}/resethash.sh clear`).catch(()=>{});
                 closeModal();
               }
             });
-
             document.getElementById("reset-hash")?.addEventListener("click", async () => {
               modalOutput.innerHTML = "Resetting...";
               try {
                 await runShell(`sh ${MODDIR}/boot_hash.sh clear`);
-                popup("Boot hash reset ✅");
+                popup("Boot hash reset ✅", "success");
               } catch {
-                popup("Failed to reset ❌");
+                popup("Failed to reset ❌", "error");
               } finally {
                 closeModal();
               }
             });
-          }, 100);
+          }, 80);
         } else if (type === "game") {
-          const gameFrame = document.createElement("iframe");
-          gameFrame.src = "./game/index.html";
-          gameFrame.style.border = "none";
-          gameFrame.style.width = "100%";
-          gameFrame.style.height = "100%";
-          gameFrame.style.flex = "1";
-          gameFrame.style.borderRadius = "0";
-
+          const gf = document.createElement("iframe");
+          gf.src = "./game/index.html";
+          gf.style.border = "none";
+          gf.style.width = "100%";
+          gf.style.height = "100%";
+          gf.style.flex = "1";
+          gf.style.borderRadius = "0";
           openModal("", "", true);
           modalOutput.innerHTML = "";
-          modalOutput.appendChild(gameFrame);
+          modalOutput.appendChild(gf);
+          popup(mapping.start, mapping.type);
           return;
         } else if (script === "support") {
-          const content = `
-<style>
-  .donate-modal * { font-family: inherit; box-sizing: border-box; }
-  .donate-modal {
-    padding-top: 0;
-    margin-top: -1rem;
-  }
-  .donate-header {
-    font-size: 0.9rem;
-    font-weight: 500;
-    text-align: center;
-    margin-bottom: 1.2rem;
-    color: var(--fg);
-  }
-  .donate-entry {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 1.5rem;
-  }
-  .coin {
-    width: 170px !important;
-    height: 170px !important;
-    margin: 0 auto 0.6rem auto !important;
-    display: block;
-  }
-  .donate-entry span {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--fg);
-    margin-bottom: 0.5rem;
-  }
-  .donate-address-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: var(--panel-bg);
-    padding: 0.7rem 0.9rem;
-    border-radius: 10px;
-    font-family: monospace;
-    font-size: 0.8rem;
-    word-break: break-all;
-    border: 1px solid var(--border-color);
-    margin-bottom: 0.5rem;
-  }
-  .donate-address {
-    flex-grow: 1;
-    margin-right: 0.8rem;
-  }
-  .copy-btn {
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    padding: 14px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.7rem;
-    font-weight: 600;
-  }
+  const content = `<style>
+.donate-modal *{font-family:inherit;box-sizing:border-box}
+.donate-modal{padding-top:0;margin-top:-1rem}
+.donate-header{font-size:0.9rem;font-weight:500;text-align:center;margin-bottom:1.2rem;color:var(--fg)}
+.donate-entry{display:flex;flex-direction:column;align-items:center;margin-bottom:1.5rem}
+.coin{width:170px!important;height:170px!important;margin:0 auto 0.6rem auto!important;display:block}
+.donate-address-row{display:flex;align-items:center;justify-content:space-between;background-color:var(--panel-bg);padding:0.7rem 0.9rem;border-radius:10px;font-family:monospace;font-size:0.8rem;word-break:break-all;border:1px solid var(--border-color);margin-bottom:0.5rem}
+.donate-address{flex-grow:1;margin-right:0.8rem}
+.copy-btn{background:var(--accent);color:var(--bg);border:none;padding:14px 12px;border-radius:8px;cursor:pointer;font-size:0.7rem;font-weight:600}
+..supporter-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background-color: var(--panel-bg);
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 0.8rem;
+  text-align: center;
+}
+
+.supporter-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent);
+  display: block;
+}
+
+.supporter-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.supporter-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-top: 0.3rem;
+}
+
+.supporter-donation {
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+}
+
+.supporter-link {
+  font-size: 0.8rem;
+  color: var(--accent);
+  text-decoration: none;
+}
 </style>
 
 <div class="donate-modal">
-  <div class="donate-header">
-    Only donate if you're earning.<br>
-    Students and unemployed supporters, your kindness is more than enough 💖
+  <div class="donate-header">Only donate if you're earning.<br>Students and unemployed supporters, your kindness is more than enough 💖</div>
+
+  <div class="donate-entry">
+  <img 
+    src="https://raw.githubusercontent.com/MeowDump/Integrity-Box/main/DUMP/binance.png" 
+    alt="Binance Pay ID" 
+    style="width:335px; height:432px; max-width:none; display:block;"
+  />
+    <span>Binance Pay ID</span>
+  </div>
+  <div class="donate-address-row">
+    <span class="donate-address">69695263</span>
+    <button class="copy-btn" data-copy="69695263">🪙</button>
   </div>
 
   <div class="donate-entry">
@@ -315,28 +510,65 @@ document.addEventListener("DOMContentLoaded", () => {
     <span class="donate-address">https://paypal.me/TempMeow</span>
     <button class="copy-btn" data-copy="https://paypal.me/TempMeow">🪙</button>
   </div>
-</div>
-`;
-          openModal("Support the Developer", content.trim(), true);
 
-          document.querySelectorAll('.copy-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-              const text = btn.getAttribute('data-copy');
-              navigator.clipboard.writeText(text).then(() => {
-                btn.textContent = "🩷";
-                setTimeout(() => (btn.textContent = "✅"), 2000);
+  <div style="margin-top:1.5rem;font-size:0.95rem;text-align:center;font-weight:600">🌟 Supporters 🌟</div>
+  <div class="supporter-card">
+    <img src="https://raw.githubusercontent.com/MeowDump/Integrity-Box/refs/heads/main/DUMP/paw7.png" alt="Anonymous" class="supporter-avatar" />
+    <div class="supporter-info">
+      <div class="supporter-name">Anonymous</div>
+      <div class="supporter-donation">Donated: $1,000</div>
+    </div>
+  </div>
+  
+  <div class="supporter-card">
+    <img src="https://raw.githubusercontent.com/MeowDump/Integrity-Box/refs/heads/main/DUMP/paw7.png" alt="Jane Smith" class="supporter-avatar" />
+    <div class="supporter-info">
+      <div class="supporter-name">William Jane</div>
+      <div class="supporter-donation">Donated: $200</div>
+    </div>
+  </div>
+
+  <div class="supporter-card">
+    <img src="https://raw.githubusercontent.com/MeowDump/Integrity-Box/refs/heads/main/DUMP/paw7.png" alt="John Doe" class="supporter-avatar" />
+    <div class="supporter-info">
+      <div class="supporter-name">Muhammad Fahad</div>
+      <div class="supporter-donation">Donated: $85</div>
+    </div>
+  </div>
+
+  <div class="supporter-card">
+    <img src="https://raw.githubusercontent.com/MeowDump/Integrity-Box/refs/heads/main/DUMP/paw7.png" alt="Jane Smith" class="supporter-avatar" />
+    <div class="supporter-info">
+      <div class="supporter-name">Abhinav Singh</div>
+      <div class="supporter-donation">Donated: $45</div>
+    </div>
+  </div>
+
+</div>`;
+          openModal("Support the Developer", content, true);
+          setTimeout(() => {
+            document.querySelectorAll('.copy-btn').forEach(cb => {
+              cb.addEventListener('click', () => {
+                const text = cb.getAttribute('data-copy') || "";
+                if (!navigator.clipboard) { popup("Clipboard unavailable", "error"); return; }
+                navigator.clipboard.writeText(text).then(() => {
+                  cb.textContent = "🩷";
+                  setTimeout(() => (cb.textContent = "✅"), 1500);
+                }).catch(() => popup("Failed to copy", "error"));
               });
             });
-          });
+          }, 80);
         } else {
-          await runShell(command);
+          if (!command) throw new Error("No script specified");
+          try {
+            const out = await runShell(command);
+            popup(mapping.success, "success");
+          } catch (err) {
+            popup(`Error: ${err.message || String(err)}`, "error");
+          }
         }
-      } catch (error) {
-        if (type === "scanner") {
-          modalOutput.textContent = `Error executing script:\n\n${error.message}`;
-        } else {
-          popup(`Error: ${error.message}`);
-        }
+      } catch (e) {
+        popup(`Error: ${e.message || String(e)}`, "error");
       } finally {
         btn.classList.remove("loading");
         setTimeout(updateDashboard, 1000);
@@ -344,112 +576,40 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  modalClose.addEventListener("click", closeModal);
-  modalBackdrop.addEventListener("click", (e) => {
-    if (e.target === modalBackdrop) closeModal();
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !modalBackdrop.classList.contains("hidden")) {
-      closeModal();
-    }
-  });
+  modalClose?.addEventListener("click", closeModal);
+  modalBackdrop?.addEventListener("click", (e) => { if (e.target === modalBackdrop) closeModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && modalBackdrop && !modalBackdrop.classList.contains("hidden")) closeModal(); });
 
   const langDropdown = document.getElementById("lang-dropdown");
-  langDropdown.addEventListener("change", async () => {
-    const lang = langDropdown.value;
-    document.documentElement.setAttribute("dir", lang === "ar" || lang === "ur" ? "rtl" : "ltr");
-
-    try {
-      const module = await import(`./lang/${lang}.js`);
-      const { translations, buttonGroups, buttonOrder } = module;
-
-      document.querySelectorAll(".group-title").forEach(title => {
-        const originalKey = title.dataset.key || title.textContent;
-        if (!title.dataset.key) title.dataset.key = originalKey;
-        if (buttonGroups[originalKey] && buttonGroups[originalKey][lang]) {
-          title.textContent = buttonGroups[originalKey][lang];
-        }
-      });
-
-      const labels = translations[lang] || translations["en"];
-      buttonOrder.forEach((scriptName, index) => {
-        const btn = document.querySelector(`.btn[data-script='${scriptName}']`);
-        if (btn) {
-          const icon = btn.querySelector('.icon');
-          const spinner = btn.querySelector('.spinner');
-          const label = labels[index] || btn.textContent.trim();
-          btn.innerHTML = '';
-          if (icon) btn.appendChild(icon);
-          btn.appendChild(document.createTextNode(label));
-          if (spinner) btn.appendChild(spinner);
-        }
-      });
-    } catch (e) {
-      console.error("Failed to load language file", e);
-    }
-  });
-
-  langDropdown.dispatchEvent(new Event("change"));
+  const savedLang = localStorage.getItem("lang") || "en";
+  if (langDropdown) {
+    langDropdown.value = savedLang;
+    langDropdown.addEventListener("change", async () => {
+      const l = langDropdown.value || "en";
+      await changeLanguage(l);
+    });
+    await changeLanguage(savedLang);
+  }
 
   const toggle = document.getElementById("theme-toggle");
+  const savedTheme = localStorage.getItem("theme") || "dark";
   function applyTheme(theme) {
     if (theme === "light") {
-      document.documentElement.classList.remove("dark");
       document.documentElement.classList.add("light");
-      toggle.checked = false;
+      document.documentElement.classList.remove("dark");
+      if (toggle) toggle.checked = false;
     } else {
       document.documentElement.classList.remove("light");
       document.documentElement.classList.add("dark");
-      toggle.checked = true;
+      if (toggle) toggle.checked = true;
     }
   }
-
-  function changeLanguage(lang) {
-    localStorage.setItem("lang", lang);
-
-    const existingScript = document.getElementById("lang-script");
-    if (existingScript) existingScript.remove();
-
-    window.translations = {};
-
-    const script = document.createElement("script");
-    script.id = "lang-script";
-    script.src = `lang/${lang}.js`;
-    script.onload = () => {
-      if (window.translations) {
-        translateUI();
-      }
-    };
-    document.head.appendChild(script);
-  }
-
-  function translateUI() {
-    document.querySelectorAll("[data-i18n]").forEach((el) => {
-      const key = el.getAttribute("data-i18n");
-      if (window.translations && window.translations[key]) {
-        el.innerText = window.translations[key];
-      }
-    });
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const savedLang = localStorage.getItem("lang") || "en";
-    changeLanguage(savedLang);
-  });
-
-    const introText = document.querySelector('.intro-text');
-    if (introText && document.documentElement.classList.contains('light')) {
-      introText.style.color = '#ec407a';
-      introText.style.borderRight = '2px solid #ec407a';
-    }
-
-    const savedTheme = localStorage.getItem("theme") || "dark";
-    applyTheme(savedTheme);
-
+  applyTheme(savedTheme);
+  if (toggle) {
     toggle.addEventListener("change", () => {
       const newTheme = toggle.checked ? "dark" : "light";
       localStorage.setItem("theme", newTheme);
       applyTheme(newTheme);
     });
-  });
+  }
+});
