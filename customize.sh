@@ -23,13 +23,16 @@ mona20="$mona02/keybox.xml.bak"
 mona21="$mona03/download.log"
 mona22="aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL01l"
 mona23="b3dEdW1wL01lb3dEdW1wL3JlZnMvaGVhZHMv"
-mona24="bWFpbi9OdWxsVm9pZC9VbHRyb24udGFy"
+mona24="bWFpbi9OdWxsVm9pZC9"
 mona25="$mona02/.k"
 mona26="$mona02/target.txt.bak"
 mona27="$mona03/download.log"
-mona28="popup.toast"
+mona28="imagine.detecting.ablank.app"
 mona29="/data/adb/modules"
 mona30="$mona05/$mona07"
+mona31="/data/adb/service.d"
+mona32="/sdcard/skip"
+mona33="NZWdhdHJvbi50YXI="
 
 # Logger
 meow() {
@@ -43,9 +46,48 @@ meownload() {
 # Create files & folder 
 mkdir -p $mona03
 touch $mona03/VerifiedBootHash.txt
+mkdir -p $mona31
 touch $mona03/Installation.log
 touch "/sdcard/stop"
 meow " "
+
+cat <<'EOF' > "$mona31/debug.sh"
+#!/system/bin/sh
+L="/data/adb/Integrity-Box-Logs/debug.log"
+
+# Logger
+meow() {
+    echo "$1" | tee -a "$L"
+}
+
+resetprop -p --delete persist.log.tag.LSPosed
+resetprop -p --delete persist.log.tag.LSPosed-Bridge
+
+# Get current fingerprint
+fp=$(getprop ro.build.fingerprint)
+
+echo "$fp" | grep -q "userdebug"
+if [ $? -eq 0 ]; then
+    meow "Debug fingerprint detected. Cleaning it up..."
+
+    fp_clean=${fp/userdebug/user}
+    fp_clean=${fp_clean/test-keys/release-keys}
+    fp_clean=${fp_clean/dev-keys/release-keys}
+
+    resetprop ro.build.fingerprint "$fp_clean"
+    resetprop ro.build.type "user"
+    resetprop ro.build.tags "release-keys"
+
+    meow "Cleaned fingerprint applied:"
+    meow "$fp_clean"
+    meow " "
+    meow " "
+else
+    meow "Fingerprint already clean. No changes made."
+fi
+EOF
+
+chmod 755 "$mona31/debug.sh"
 
 # Verify ZIP
 TMPDIR="${TMPDIR:-/dev/tmp}"
@@ -71,12 +113,14 @@ internet() {
         for host in $_hosts; do
             # Use TCP check as fallback if ICMP fails (using curl)
             if ping -c 1 -W 2 "$host" >/dev/null 2>&1 || curl -s --max-time 2 http://clients3.google.com/generate_204 >/dev/null; then
-                meow " ✦ Internet connection is available (Attempt $_attempt/$_max_retries)"
+                meow " ✦ Internet connection is available"
+                meow "    Attempt: ( $_attempt/$_max_retries)"
                 return 0
             fi
         done
 
-        meow " ✦ Internet not available $_attempt/$_max_retries"
+        meow "    Internet not available"
+        meow "    Attempt: ( $_attempt/$_max_retries)"
         _attempt=$(( _attempt + 1 ))
         sleep 1
     done
@@ -100,7 +144,7 @@ tee_detector() {
 
 # Pop-up function 
 popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
+    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
     sleep 0.5
 }
 
@@ -240,26 +284,32 @@ if ! internet; then
 fi
 
 meow " "
-meow " ✦ Checking for file tampering"
+meow " ✦ Re-Verifying via MD5"
 verify_integrity "$mona14" "$mona15" "script" || exit 1
 verify_integrity "$mona14" "$mona17" "toaster" || exit 1
 
-# Install apk to generate pop-up messages 
+# Remove old pop-up generator
 #meow " ✦ Preparing toaster"
 #if pm list packages | grep -q "meow.helper"; then
 #  pm uninstall meow.helper >/dev/null 2>&1
 #fi
 
-# Install toaster
-
-if [ -f "$mona30" ]; then
-  if pm install "$mona30" >/dev/null 2>&1; then
-    popup "Thanks for using INTEGRITY BOX"
-  else
-    meow "Toaster installation failed."
-  fi
+# Install toaster only if $mona32 does NOT exist
+if [ -f "$mona32" ]; then
+    meow " "
+    meow " ✦ Skip file detected"
+    meow " ✦ Skipping popup installation"
+    meow " "
 else
-  meow "Toaster.apk not found"
+    if [ -f "$mona30" ]; then
+        if pm install "$mona30" >/dev/null 2>&1; then
+            popup "Thanks for using INTEGRITY BOX"
+        else
+            meow "Toaster installation failed."
+        fi
+    else
+        meow "Toaster.apk not found"
+    fi
 fi
 
 # BusyBox detector 
@@ -307,17 +357,18 @@ meow " "
 meow " ✦ Scanning Play Integrity Fix"
 if [ -d "$mona10" ] && [ -f "$mona11" ]; then
     if grep -q "name=Play Integrity Fix" "$mona11"; then
-        meow " ✦ Detected: Play Integrity"
+        meow " ✦ Detected: Play Integrity Fix module"
         meow " ✦ Refreshing fingerprint using chiteroman's fork module"
         meow " "
-        sh "$mona10/autopif.sh" #> /dev/null 2>&1
+        sh "$mona10/autopif.sh" > /dev/null 2>&1
         popup "Custom Fingerprint has been updated"
         meow " "
     elif grep -q "name=Play Integrity Fork" "$mona11"; then
-        meow " ✦ Detected: PIF by osm0sis"
+        meow " ✦ Detected: PIF by osm0sis @ xda-developers"
         meow " ✦ Refreshing fingerprint using osm0sis's module"
-        meow " "
-        sh "$mona10/autopif2.sh" #> /dev/null 2>&1
+        sh "$mona10/autopif2.sh" > /dev/null 2>&1
+        meow " ✦ Forcing PIF to use Advanced settings"
+        sh "$mona10/migrate.sh -a -f"
         popup "Custom Fingerprint has been updated"
         meow " "
         
@@ -400,7 +451,7 @@ meow " ✦ Backing-up old keybox"
 
 [ -s "$mona19" ] && cp -f "$mona19" "$mona20"
 
-X=$(printf '%s%s%s' "$mona22" "$mona23" "$mona24" | tr -d '\n' | sanitizer)
+X=$(printf '%s%s%s' "$mona22" "$mona23" "$mona24" "$mona33" | tr -d '\n' | sanitizer)
 
 PATH="${B%/*}:$PATH"
 echo " ✦ Downloading keybox"
@@ -449,7 +500,7 @@ rm -f "$hex_decoded"
 [ -s "$mona25" ] && cp -f "$mona25" "$mona19"
 
 rm -f "$mona18" "$mona25"
-F="moona.xd"
+F="hellomona"
 
 if [ ! -s "$mona19" ]; then
   if [ -s "$mona20" ]; then
@@ -524,15 +575,71 @@ meownload " ✦ Verification succeed"
  fi
 
 # Remove banner for magisk users 
-#if [ -f /data/adb/magisk/magisk ]; then
-#  rm -f $mona05/.mona
-#fi
+if [ -f /data/adb/magisk/magisk ]; then
+  rm -f $mona05/meow
+fi
 
 # Remove openssl binaries & logs generate by any previous version of module (if exists)
 chmod +x "$mona05/cleanup.sh"
 sh "$mona05/cleanup.sh"
+sleep 2
 
-meow " ✦ Smash The Action/WebUI After Rebooting"
+PKG="com.android.vending"
+THRESHOLD_MAJOR=45
+
+version_name=$(dumpsys package "$PKG" 2>/dev/null | grep -m 1 "versionName=" | cut -d= -f2)
+version_major=$(echo "$version_name" | cut -d. -f1)
+
+if [ -z "$version_name" ]; then
+  echo "Unable to detect Play Store version."
+  exit 0
+fi
+
+if [ "$version_major" -gt "$THRESHOLD_MAJOR" ]; then
+  echo " "
+  echo "=================================="
+  echo "   Play Store Version Check"
+  echo "=================================="
+  sleep 1
+  echo "Detected Play Store version: $version_name"
+  sleep 2
+  echo " "
+  echo "      --------------------"
+  echo "            NOTICE:"
+  echo "      --------------------"
+  sleep 1
+  echo "Various users have reported being unable "
+  echo "to pass Play Integrity on these versions. "
+  echo "This issue is user-specific, some users"
+  echo "still pass without any problems."
+  sleep 3
+  echo " "
+  echo "If you are facing this problem, "
+  echo "follow the steps below:"
+  sleep 2
+  echo " "
+  echo "------------------------------------------------------"
+  echo "Steps to try if failing Device or Strong Integrity:"
+  echo "------------------------------------------------------"
+  sleep 1
+  echo " ✦ Open App Info for Google Play Store"
+  sleep 2
+  echo " ✦ Tap the 3 dots (menu) in the top-right"
+  sleep 2
+  echo " ✦ Select 'Uninstall updates'"
+  sleep 2
+  echo " ✦ Open Play Store settings and disable auto-updates"
+  sleep 2
+  echo " ✦ Install the provided downgraded Play Store APK"
+  sleep 2
+  echo " ✦ Use MT Manager / SAI to install it"
+  sleep 4
+  echo " "
+  echo "Installation will complete shortly and"
+  echo "you will be redirected to the APK file."
+  echo " "
+fi
+
 meow " "
 meow " "
 meow "         ••• Installation Completed ••• "
@@ -540,7 +647,8 @@ meow " "
 meow " " 
 
 # Redirect Module Release Source and Finish Installation
-nohup am start -a android.intent.action.VIEW -d https://t.me/MeowDump >/dev/null 2>&1 &
-popup "This module was released by 𝗠𝗘𝗢𝗪 𝗗𝗨𝗠𝗣"
+nohup am start -a android.intent.action.VIEW -d https://t.me/MeowRedirect/771 >/dev/null 2>&1 &
+#popup "This module was released by 𝗠𝗘𝗢𝗪 𝗗𝗨𝗠𝗣"
+popup "Redirecting to downgraded Playstore version APK"
 exit 0
 # End Of File

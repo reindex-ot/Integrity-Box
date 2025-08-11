@@ -1,124 +1,133 @@
 #!/system/bin/sh
 
 SCRIPT_DIR="/data/adb/modules/integrity_box/webroot/common_scripts"
-KEY_DIR="/data/adb/modules/integrity_box"
-TMP_KEY="/dev/key_tmp"
+PIF="/data/adb/modules/playintegrityfix"
+TARGET="$SCRIPT_DIR/user.sh"
+KILL="$SCRIPT_DIR/kill.sh"
+UPDATE="$SCRIPT_DIR/key.sh"
+LOG="/data/adb/Integrity-Box-Logs/action.log"
 
-MENU="
-Update Keybox:key.sh
-Kill GMS process:kill.sh
-Set Custom Fingerprint:pif.sh
-Spoof PIF SDK:spoof.sh
-Add All apps in Target list:systemuser.sh
-Disable Auto-Whitelist Mode:stop.sh
-Enable Auto-Whitelist Mode:start.sh
-Add only User apps in Target list:user.sh
-Spoof/Unspoof Security Patch:patch.sh
-Enable/Disable WebUI timeout:modal.sh
-Set AOSP keybox:aosp.sh
-Set Valid keybox (if AOSP):keybox.sh
-FIX Device not Certified:vending.sh
-Update SusFS Config:sus.sh
-Enable GMS Spoofing prop:setprop.sh
-Disable GMS Spoofing prop:resetprop.sh
-Abnormal Detection:abnormal.sh
-Flagged Apps Detection:app.sh
-Props Detection:prop.sh
-Help Group:meowverse.sh
-Telegram Channel:meowdump.sh
-Report a problem:issue.sh
-Change SElinux status:selinux.sh
-"
+TOTAL_STEPS=5
+PASS_COUNT=0
+FAIL_COUNT=0
+SUMMARY=""
 
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n popup.toast/meow.helper.MainActivity > /dev/null
-    sleep 0.5
+# logger
+log_line() {
+    printf "%s\n" "$1" | tee -a "$LOG"
 }
 
-draw_box() {
-  echo " "
-  echo "╔══════════════════════════╗"
-  while IFS= read -r line; do
-    printf "║ %-28s ║\n" "$line"
-  done <<EOF
-$1
-EOF
-  echo "╚══════════════════════════╝"
-  echo " "
+# print step header
+start_step() {
+    log_line ""
+    log_line "----------------------------------------"
+    log_line "[$1/${TOTAL_STEPS}] $2"
+    log_line "----------------------------------------"
 }
 
-print_menu() {
-  clear
-  draw_box "     Integrity-Box Menu "
-  echo " ✦ Use Volume Down to navigate"
-  echo " ✦ Use Volume Up to execute"
-  echo " "
-  print_selection_only
+# run a command (passed as single string), capture output and exit code
+run_cmd_capture() {
+    CMD_STR="$1"
+    TMP_OUT="/data/local/tmp/integrity_box_action.$$"
+    # run the command, capture stdout+stderr to TMP_OUT
+    sh -c "$CMD_STR" >"$TMP_OUT" 2>&1
+    RC=$?
+    # stream output lines to log
+    if [ -f "$TMP_OUT" ]; then
+        while IFS= read -r line; do
+            [ -n "$line" ] && log_line "    → $line"
+        done < "$TMP_OUT"
+        rm -f "$TMP_OUT"
+    fi
+    return $RC
 }
 
-print_selection_only() {
-  i=1
-  while IFS= read -r line; do
-    LABEL=$(echo "$line" | cut -d: -f1)
-    [ "$i" -eq "$INDEX" ] && echo ">> $LABEL" || echo "   $LABEL"
-    i=$((i + 1))
-  done < /dev/tmp_menu
-  echo " "
+# safe delay handler
+handle_delay() {
+    if [ -z "$MMRL" ]; then
+        if [ "$KSU" = "true" ] || [ "$APATCH" = "true" ]; then
+            if [ "$KSU_NEXT" != "true" ]; then
+                log_line "Closing dialog in 10 seconds..."
+                sleep 5
+            fi
+        fi
+    fi
 }
 
-# Function to get key press using keycheck
-wait_for_key() {
-  chmod +x "$KEY_DIR/keycheck"
+# Step 1
+start_step 1 "Updating Tricky Store packages"
+#log_line "  - Updating target list as per your TEE status"
+if run_cmd_capture "sh \"$TARGET\""; then
+    log_line "  [OK]"
+    PASS_COUNT=`expr $PASS_COUNT + 1`
+    SUMMARY="$SUMMARY\n[OK]    Step 1: Updating Tricky Store packages"
+else
+    log_line "  [FAIL]"
+    FAIL_COUNT=`expr $FAIL_COUNT + 1`
+    SUMMARY="$SUMMARY\n[FAIL]  Step 1: Updating Tricky Store packages"
+fi
 
-  while :; do
-    "$KEY_DIR/keycheck"
-    KEY="$?"
+# Step 2
+start_step 2 "Refreshing fingerprint (osm0sis's module)"
+if run_cmd_capture "sh \"$PIF/autopif2.sh\""; then
+    log_line "  [OK]"
+    PASS_COUNT=`expr $PASS_COUNT + 1`
+    SUMMARY="$SUMMARY\n[OK]    Step 2: Refreshing fingerprint"
+else
+    log_line "  [FAIL]"
+    FAIL_COUNT=`expr $FAIL_COUNT + 1`
+    SUMMARY="$SUMMARY\n[FAIL]  Step 2: Refreshing fingerprint"
+fi
 
-    # Debounce loop: wait until no key is pressed
-    sleep 0.2
-    "$KEY_DIR/keycheck"
-    [ "$?" != "$KEY" ] && continue
+# Step 3
+start_step 3 "Applying Advanced settings to PIF"
+if run_cmd_capture "sh \"$PIF/migrate.sh\" -a -f"; then
+    log_line "  [OK]"
+    PASS_COUNT=`expr $PASS_COUNT + 1`
+    SUMMARY="$SUMMARY\n[OK]    Step 3: Applying Advanced settings"
+else
+    log_line "  [FAIL]"
+    FAIL_COUNT=`expr $FAIL_COUNT + 1`
+    SUMMARY="$SUMMARY\n[FAIL]  Step 3: Applying Advanced settings"
+fi
 
-    # Once key is stable, return the value
-    return "$KEY"
-  done
-}
+# Step 4
+start_step 4 "Updating Keybox"
+if run_cmd_capture "sh \"$UPDATE\""; then
+    log_line "  [OK]"
+    PASS_COUNT=`expr $PASS_COUNT + 1`
+    SUMMARY="$SUMMARY\n[OK]    Step 4: Updating Keybox"
+else
+    log_line "  [FAIL]"
+    FAIL_COUNT=`expr $FAIL_COUNT + 1`
+    SUMMARY="$SUMMARY\n[FAIL]  Step 4: Keybox Update"
+fi
 
-# Setup Menu
-echo "$MENU" | sed '/^$/d' > /dev/tmp_menu
-TOTAL=$(wc -l < /dev/tmp_menu)
-INDEX=1
+# Step 5
+start_step 5 "Restarting GMS process"
+log_line "  - Killing and restarting GMS process"
+if run_cmd_capture "sh \"$KILL\""; then
+    log_line "  [OK]"
+    PASS_COUNT=`expr $PASS_COUNT + 1`
+    SUMMARY="$SUMMARY\n[OK]    Step 5: Restarting GMS"
+else
+    log_line "  [FAIL]"
+    FAIL_COUNT=`expr $FAIL_COUNT + 1`
+    SUMMARY="$SUMMARY\n[FAIL]  Step 5: Restarting GMS"
+fi
 
-print_menu
+# Final summary 
+log_line ""
+log_line "========================================"
+log_line "               SUMMARY                  "
+log_line "========================================"
+# print the collected summary lines
+printf "%b\n" "$SUMMARY" | tee -a "$LOG"
+log_line "----------------------------------------"
+log_line "Passed: $PASS_COUNT"
+log_line "Failed: $FAIL_COUNT"
+log_line "Total:  $TOTAL_STEPS"
+log_line "========================================"
 
-# Main Interaction Loop
-while :; do
-  wait_for_key
-  key=$?
-
-  case "$key" in
-    42) # Volume Up
-      SELECTED=$(sed -n "${INDEX}p" /dev/tmp_menu)
-      LABEL=$(echo "$SELECTED" | cut -d: -f1)
-      SCRIPT=$(echo "$SELECTED" | cut -d: -f2)
-      sh "$SCRIPT_DIR/$SCRIPT"
-      echo " ✦ Done."
-      break
-      ;;
-    41) # Volume Down
-      INDEX=$((INDEX + 1))
-      [ "$INDEX" -gt "$TOTAL" ] && INDEX=1
-      SELECTED=$(sed -n "${INDEX}p" /dev/tmp_menu)
-      LABEL=$(echo "$SELECTED" | cut -d: -f1)
-      clear
-      draw_box "     Integrity-Box Menu "
-      echo " ✦ Use Volume Down to navigate"
-      echo " ✦ Use Volume Up to execute"
-      echo " "
-      print_selection_only
-      ;;
-  esac
-done
-
-rm -f /dev/tmp_menu
+handle_delay
 exit 0

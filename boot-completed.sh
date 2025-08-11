@@ -37,8 +37,25 @@ suffix() { [ "$b" = true ] && echo !; }
 #    sleep 0.5
 #}
 
-resetprop -p --delete persist.log.tag.LSPosed
-resetprop -p --delete persist.log.tag.LSPosed-Bridge
+if getprop ro.pixelage.device | grep -q .; then
+  echo "Pixelage ROM detected, skipping resetprop"
+else
+  su -c "
+    getprop | grep -Ei 'pihook|pixelprops|gms|pi' | sed -E 's/^\[(.*)\]:.*/\1/' | while read -r prop; do
+      resetprop -p -d \"\$prop\"
+    done
+  "
+fi
+
+# Remove meow helper
+if pm list packages | grep -q "meow.helper"; then
+    pm uninstall meow.helper >/dev/null 2>&1
+fi
+
+# Remove popup toaster
+if pm list packages | grep -q "popup.toast"; then
+    pm uninstall popup.toast >/dev/null 2>&1
+fi
 
 # su -c 'getprop | grep -E "pihook|pixelprops" | sed -E "s/^\[(.*)\]:.*/\1/" | while IFS= read -r prop; do resetprop -p -d "$prop"; done'
 

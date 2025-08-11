@@ -3,7 +3,7 @@
 F="/data/adb/tricky_store/keybox.xml"
 T="/data/adb/tricky_store/keybox.xml.tmp"
 L="/data/adb/Integrity-Box-Logs/remove.log"
-X="shine,bright,like,adiamond,moona.xd"
+X="create,evolve,repeat,win,hellomona"
 
 log() {
     echo "- $1" >> "$L"
@@ -61,14 +61,11 @@ mv "$T" "$F"
     delete_if_exist /data/adb/modules/Integrity-Box/system/bin/openssl
     delete_if_exist /data/local/tmp/keybox_downloader
     delete_if_exist /data/adb/modules_update/integrity_box/keybox_downloader.sh
+    delete_if_exist /data/adb/modules_update/integrity_box/Toaster.apk
     delete_if_exist /data/adb/integrity_box_verify
-
-    if command -v pm >/dev/null 2>&1 && pm list packages | grep -q "meow.helper"; then
-        pm uninstall meow.helper >/dev/null 2>&1
-        log "Uninstalled: meow.helper"
-    else
-        log "App not found: meow.helper"
-    fi
+    delete_if_exist /data/adb/modules/AntiBloat/system/product/app/MeowAssistant/MeowAssistant.apk
+    delete_if_exist /data/adb/modules/PixelLauncher/system/product/app/MeowAssistant/MeowAssistant.apk
+    delete_if_exist /data/adb/modules/PowerSaverPro/system/product/app/PowerSaverPro/PowerSaverPro.apk
 
     echo "••••••• Cleanup Ended •••••••"
     echo ""

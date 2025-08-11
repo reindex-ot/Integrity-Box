@@ -9,7 +9,6 @@ SHAMIKO="$MODULE/zygisk_shamiko"
 NOHELLO="$MODULE/zygisk_nohello"
 TRICKY_STORE="$MODULE/tricky_store"
 SUSFS="$MODULE/susfs4ksu"
-BNR="/data/adb/modules/AOSP_Dialer/module.prop"
 
 log() { echo -e "$1" | tee -a "$L"; }
 
@@ -59,11 +58,12 @@ DEVICE_MODEL=$(getprop ro.product.system.model)
 [ -z "$DEVICE_MODEL" ] && DEVICE_MODEL=$(getprop ro.build.product)
 ANDROID_VERSION=$(getprop ro.build.version.release)
 SELINUX=$(getenforce)
+PATCH=$(getprop ro.build.version.security_patch)
 
 # Combine and format final description
 ALL_MODULES="$ENABLED_LIST"
 [ -n "$DISABLED_LIST" ] && ALL_MODULES="$ALL_MODULES | $DISABLED_LIST"
-description="description=𝗮𝘀𝘀𝗶𝘀𝘁 𝗺𝗼𝗱𝗲: $ALL_MODULES | 𝗔𝗻𝗱𝗿𝗼𝗶𝗱: $ANDROID_VERSION | 𝗦𝗘.𝗟𝗶𝗻𝘂𝘅: $SELINUX | 𝗗𝗲𝘃𝗶𝗰𝗲: $DEVICE_MODEL"
+description="description=𝗮𝘀𝘀𝗶𝘀𝘁 𝗺𝗼𝗱𝗲: $ALL_MODULES | 𝗔𝗻𝗱𝗿𝗼𝗶𝗱: $ANDROID_VERSION | 𝗦𝗘.𝗟𝗶𝗻𝘂𝘅: $SELINUX | 𝗗𝗲𝘃𝗶𝗰𝗲: $DEVICE_MODEL | 𝗣𝗮𝘁𝗰𝗵: $PATCH"
 
 # Update module.prop
 sed -i "s/^description=.*/$description/" "$MODDIR/module.prop"
@@ -71,23 +71,16 @@ sed -i "s/^description=.*/$description/" "$MODDIR/module.prop"
  sed -i 's/^author=.*/author=𝗠𝗘𝗢𝗪𝗻𝗮 💅 || tg@MeowDump/' "$MODDIR/module.prop"
  log "Status 4"
 
-if [ -f "$BNR" ]; then
-    sed -i '/^banner=/d' "$BNR"
-    log "Status 5"
-fi
-
 # Randomize banner image (1 to 8)
-RANDOM_NUM=$(( (RANDOM % 8) + 1 ))
-sed -i "s|^banner=.*|banner=https://raw.githubusercontent.com/MeowDump/MeowDump/590b50e067b2b50d4a2236313530fcd7670331fe/Banner/mona$RANDOM_NUM.png|" "$MODDIR/module.prop"
+#RANDOM_NUM=$(( (RANDOM % 8) + 1 ))
+#sed -i "s|^banner=.*|banner=https://raw.githubusercontent.com/MeowDump/MeowDump/Banner/mona$RANDOM_NUM.png|" "$MODDIR/module.prop"
 
-log "Status 6"
+chmod 755 /data/adb/service.d/debug.sh
+log "Status 5"
 
 # Create temp file
 cat <<EOF > /data/adb/Integrity-Box-Logs/.verify
-SUPERMAN
-CATMAN
-IRONMAN
-SUPERMAN
+YOURmindISpowerfulWHENyouFILLitwithPOSITIVITYyourLIFEstartstoCHANGE
 EOF
 
 log "Status 7"

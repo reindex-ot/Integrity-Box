@@ -3,6 +3,7 @@
 MODPATH=${MODPATH:-/data/adb/modules_update/integrity_box}
 VERIFY_TEMP_DIR="/data/adb/integrity_box_verify"
 LOG="/data/adb/Integrity-Box-Logs/verification.log"
+
 # Clean temp dir
 rm -rf "$VERIFY_TEMP_DIR"
 mkdir -p "$VERIFY_TEMP_DIR"
@@ -43,6 +44,9 @@ verify_file() {
   log " ✦ Verified: $relpath" > /dev/null 2>&1
   mkdir -p "$VERIFY_TEMP_DIR/$(dirname "$relpath")"
   cp -af "$file" "$VERIFY_TEMP_DIR/$relpath"
+
+  # ✅ Delete the hash file after successful verification
+  rm -f "$hashfile"
 }
 
 # Find all files (excluding *.sha256)
