@@ -1,7 +1,7 @@
 body {
   margin: 0;
   overflow: hidden;
-  background: #87ceeb;
+  background: #fff0f4;
   font-family: 'Mona', Arial, sans-serif;
   touch-action: manipulation;
 }
@@ -10,5 +10,5 @@ body {
   display: block;
   width: 100vw;
   height: 100vh;
-  background: #87ceeb;
+  background: #fff0f4;
 }

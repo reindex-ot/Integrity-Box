@@ -63,7 +63,7 @@ const buildingWidth = 120;
 const gapHeight = 350;
 
 function randomSkyColor() {
-  const skies = ['#87CEEB', '#FFA07A', '#191970'];
+  const skies = ['#121212', '#121212', '#121212'];
   return skies[Math.floor(Math.random() * skies.length)];
 }
 
