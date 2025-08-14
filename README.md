@@ -103,6 +103,12 @@
   </tr>
 </table>
 
+# Configuration
+> You can control certain module features by creating specific config file in *`/data/adb/BrainBox`* folder
+- _create `stop` file to disable module toggle feature which switches between blacklist/whitelist modes (magisk only)_
+- _create `skip` file if you're facing camera app crash_
+- _create `stoptarget` to disable target.txt auto update on boot_
+
 # Emoji Results Meaning in module's description
 > The main purpose of adding these was to centralize all Play Integrity-related info in one place, so users can spot issues in their setup and fix them on their own, without feeling lost or relying on others. I even saw people on Telegram charging money for this... LOL.
 
