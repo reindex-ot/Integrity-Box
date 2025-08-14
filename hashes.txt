@@ -1,2 +1,0 @@
-script="8b5a3d413a40fbedfd6c6d31c69241a0"
-toaster="8e343f8208aa0e00aab2aae10d457fa3"
