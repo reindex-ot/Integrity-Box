@@ -116,12 +116,12 @@
 - **TEE (Trusted Execution Environment)**
   - `🟢` — Intact  
   - `🔴` — Broken
-  - `⚠️` — Unknown
+  - `🟡` — Unknown
 
 - **ROM Sign**
   - `🟢` — Release Key
   - `🔴` — Test Key
-  - `❓` — Unknown
+  - `🟡` — Unknown
 
 - **Risky**
   - `This represents the number of risky/flagged apps installed in your device`
