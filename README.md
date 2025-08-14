@@ -144,7 +144,7 @@
 <summary><strong>Notes</strong></summary>
 
 <br>
-NOTE: Use Action/WebUI button to report bugs/issues
+NOTE: Use Report a bug/issue button in WebUI to report bugs/issues
 
 - Hide root properly if play integrity isn't passing for you. If you are using a custom rom, make sure you have disabled inbuilt gms spoofing. How to disable it? Well it depends on what rom you're using. Join your rom help group & ask `how to disable it` there.  
 - Avoid conflicting or unnecessary modules that expose your root environment
