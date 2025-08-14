@@ -103,7 +103,7 @@
   </tr>
 </table>
 
-# 📊 Emoji Results Meaning in module's description
+# Emoji Results Meaning in module's description
 > The main purpose of adding these was to centralize all Play Integrity-related info in one place, so users can spot issues in their setup and fix them on their own, without feeling lost or relying on others. I even saw people on Telegram charging money for this... LOL.
 
 - **SELinux**
