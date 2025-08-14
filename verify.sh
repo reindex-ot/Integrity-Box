@@ -2,7 +2,7 @@
 
 MODPATH=${MODPATH:-/data/adb/modules_update/integrity_box}
 VERIFY_TEMP_DIR="/data/adb/integrity_box_verify"
-LOG="/data/adb/Integrity-Box-Logs/verification.log"
+LOG="/data/adb/Box-Brain/Integrity-Box-Logs/verification.log"
 
 # Clean temp dir
 rm -rf "$VERIFY_TEMP_DIR"

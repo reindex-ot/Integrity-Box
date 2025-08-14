@@ -1,9 +1,9 @@
 id=integrity_box
 name=Integrity Box 📦
-version=v14
-versionCode=1400
+version=v15
+versionCode=1500
 author=github.com/MeowDump
-description=This module provides real, working keyboxes for free with no hidden charges or scams, along with several powerful features. Smash the WebUI button to discover more!
-updateJson=https://raw.githubusercontent.com/MeowDump/MeowDump/IntegrityBox/release.json
+description=Remember, the world doesn’t revolve around Play Integrity, Android, or root. Life’s short! count every blessing and be happy for no reason. Have a great day 😊 
+updateJson=https://raw.githubusercontent.com/MeowDump/MeowDump/refs/heads/main/IntegrityBox/release.json
 support=https://t.me/MeowDump
 banner=meow

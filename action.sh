@@ -1,11 +1,26 @@
 #!/system/bin/sh
+echo "     ____      __                  _ __       "
+echo "    /  _/___  / /____  ____ ______(_) /___  __"
+echo "    / // __ \/ __/ _ \/ __ / ___/ / __/ / /  / "
+echo "  _/ // / / / /_/  __/ /_/ / /  / / /_/ /_/ / "
+echo " /___/_/_/_/\__/\___/\__, /_/  /_/\__/\__, /  "
+echo "      ___           ____/            ____/   "
+echo "    / __ )____  _     "
+echo "   / __  / __ \| |/_/ "
+echo "  / /_/ / /_/ />  < "
+echo " /_____/\____/_/|_| "
+echo " "
+echo " "
+
+echo " Preparing Auto Mode, Please Wait...."
+echo " "
 
 SCRIPT_DIR="/data/adb/modules/integrity_box/webroot/common_scripts"
 PIF="/data/adb/modules/playintegrityfix"
-TARGET="$SCRIPT_DIR/user.sh"
+TARGET="/data/adb/modules/integrity_box/boot-completed.sh"
 KILL="$SCRIPT_DIR/kill.sh"
 UPDATE="$SCRIPT_DIR/key.sh"
-LOG="/data/adb/Integrity-Box-Logs/action.log"
+LOG="/data/adb/Box-Brain/Integrity-Box-Logs/action.log"
 
 TOTAL_STEPS=5
 PASS_COUNT=0

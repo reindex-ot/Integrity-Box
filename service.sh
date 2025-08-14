@@ -1,9 +1,16 @@
 #!/system/bin/sh
 
-# Define popup
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
-    sleep 0.5
+# Module path and file references
+MCTRL="${0%/*}"
+SHAMIKO_WHITELIST="/data/adb/shamiko/whitelist"
+NOHELLO_DIR="/data/adb/nohello"
+NOHELLO_WHITELIST="$NOHELLO_DIR/whitelist"
+LOG_DIR="/data/adb/Box-Brain/Integrity-Box-Logs"
+LOG="$LOG_DIR/service.log"
+
+# Logger
+log() {
+    echo "$1" | tee -a "$LOG"
 }
 
 # Check for Magisk presence
@@ -11,27 +18,21 @@ is_magisk() {
     [ -d /data/adb/magisk ] || getprop | grep -q 'magisk'
 }
 
-# Module path and file references
-MCTRL="${0%/*}"
-SHAMIKO_WHITELIST="/data/adb/shamiko/whitelist"
-NOHELLO_DIR="/data/adb/nohello"
-NOHELLO_WHITELIST="$NOHELLO_DIR/whitelist"
-
 # Initial states
 shamiko_prev=""
 nohello_prev=""
 
 # Loop to monitor toggle state
 while true; do
-  if [ -f /sdcard/stop ]; then
-#    popup "Stop file found. Exiting background loop."
+  if [ -f /data/adb/Box-Brain/stop ]; then
+#    log "Stop file found. Exiting background loop."
     rm -rf $SHAMIKO_WHITELIST
     rm -rf $NOHELLO_WHITELIST
     break
   fi
   
   if [ ! -e "${MCTRL}/disable" ] && [ ! -e "${MCTRL}/remove" ]; then
-    if is_magisk && [ ! -f /sdcard/stop ]; then
+    if is_magisk && [ ! -f /data/adb/Box-Brain/stop ]; then
 
       if [ ! -f "$SHAMIKO_WHITELIST" ]; then
         touch "$SHAMIKO_WHITELIST"
@@ -41,15 +42,15 @@ while true; do
         touch "$NOHELLO_WHITELIST"
       fi
 
-      # Show popup if Shamiko just got activated
+      # Show log if Shamiko just got activated
       if [ "$shamiko_prev" != "on" ] && [ -f "$SHAMIKO_WHITELIST" ]; then
-        popup "Shamiko Whitelist Mode Activated.✅"
+        log "Shamiko Whitelist Mode Activated.✅"
         shamiko_prev="on"
       fi
 
-      # Show popup if NoHello just got activated
+      # Show log if NoHello just got activated
       if [ "$nohello_prev" != "on" ] && [ -f "$NOHELLO_WHITELIST" ]; then
-        popup "NoHello Whitelist Mode Activated.✅"
+        log "NoHello Whitelist Mode Activated.✅"
         nohello_prev="on"
       fi
 
@@ -57,13 +58,13 @@ while true; do
   else
     if [ -f "$SHAMIKO_WHITELIST" ]; then
       rm -f "$SHAMIKO_WHITELIST"
-      popup "Shamiko Blacklist Mode Activated.❌"
+      log "Shamiko Blacklist Mode Activated.❌"
       shamiko_prev="off"
     fi
 
     if [ -f "$NOHELLO_WHITELIST" ]; then
       rm -f "$NOHELLO_WHITELIST"
-      popup "NoHello Blacklist Mode Activated.❌"
+      log "NoHello Blacklist Mode Activated.❌"
       nohello_prev="off"
     fi
   fi
@@ -99,18 +100,3 @@ rm -f "$MODPATH/tmp.prop"
 
 sleep 30
 resetprop -n --file "$MODPATH/system.prop"
-
-# Hide unlocked bootloader
-#sleep 5
-#resetprop ro.boot.vbmeta.device_state locked
-#resetprop ro.boot.verifiedbootstate green
-#resetprop ro.boot.flash.locked 1
-#resetprop ro.boot.veritymode enforcing
-#resetprop vendor.boot.vbmeta.device_state locked
-#resetprop vendor.boot.verifiedbootstate green
-#resetprop ro.secureboot.lockstate locked
-#resetprop ro.boot.realmebootstate green
-#resetprop ro.boot.realme.lockstate 1
-#resetprop ro.bootmode unknown
-#resetprop ro.boot.bootmode unknown
-#resetprop vendor.boot.bootmode unknown
