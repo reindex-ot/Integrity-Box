@@ -107,10 +107,10 @@ if [ -f "$TEE_FILE" ]; then
     case "$TEE_VAL" in
         true)  TEE_STATUS="🔴" ;;
         false) TEE_STATUS="🟢" ;;
-        *)     TEE_STATUS="⚠️" ;;
+        *)     TEE_STATUS="🟡" ;;
     esac
 else
-    TEE_STATUS="⚠️"
+    TEE_STATUS="🟡"
 fi
 
 # ROM signature check
@@ -119,7 +119,7 @@ if [ -f /system/etc/security/otacerts.zip ]; then
     case "$ROM_SIGN" in
         *release*) ROM_SIGN_STATUS="🟢" ;;
         *test*)    ROM_SIGN_STATUS="🔴" ;;
-        *)         ROM_SIGN_STATUS="❓" ;;
+        *)         ROM_SIGN_STATUS="🟡" ;;
     esac
 else
     ROM_SIGN_STATUS="❓"
