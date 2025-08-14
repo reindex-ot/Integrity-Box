@@ -1,6 +1,6 @@
 #!/system/bin/sh
 
-MODDIR="/data/adb/modules/integrity_box"
+MODDIR="/data/adb/modules/integrity_box/toolbox"
 MODULE_PROP="/data/adb/modules/playintegrityfix/module.prop"
 
 SRC_PIF="$MODDIR/pif.prop"
@@ -9,13 +9,8 @@ SRC_FORK="$MODDIR/custom.pif.json"
 DST_PIF="/data/adb/modules/playintegrityfix/pif.prop"
 DST_FORK="/data/adb/modules/playintegrityfix/custom.pif.json"
 
-LOG="/data/adb/Integrity-Box-Logs/pif.log"
+LOG="/data/adb/Box-Brain/Integrity-Box-Logs/pif.log"
 KILL="$MODDIR/webroot/common_scripts/kill.sh"
-
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
-    sleep 0.5
-}
 
 log() {
     echo -e "$1" | tee -a "$LOG"
@@ -36,10 +31,8 @@ if [ -f "$MODULE_PROP" ]; then
             cp "$SRC_FORK" "$DST_FORK"
             chmod 644 "$DST_FORK"
             log "- Updated custom.pif.json"
-            popup "custom.pif.json updated"
         else
             log "❌ custom.pif.json not found"
-            popup "custom.pif.json missing"
         fi
     else
         if [ -f "$SRC_PIF" ]; then
@@ -47,15 +40,12 @@ if [ -f "$MODULE_PROP" ]; then
             cp "$SRC_PIF" "$DST_PIF"
             chmod 644 "$DST_PIF"
             log "- Updated pif.prop"
-            popup "pif.prop updated"
         else
             log "❌ pif.prop not found"
-            popup "pif.prop missing"
         fi
     fi
 else
     log "❌ playintegrityfix not found"
-    popup "PIF module not found"
 fi
 
 sleep 2

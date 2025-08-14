@@ -1,17 +1,11 @@
 #!/system/bin/sh
 
 # Define paths
-LOG_FILE="/data/adb/Integrity-Box-Logs/spoofing.log"
+LOG_FILE="/data/adb/Box-Brain/Integrity-Box-Logs/spoofing.log"
 
 # Define prop files
 PROP_FILE_1="/data/adb/modules/playintegrityfix/pif.prop"
 PROP_FILE_2="/data/adb/pif.prop"
-
-# Popup function
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
-    sleep 0.5
-}
 
 # Logger function
 log() {
@@ -79,7 +73,7 @@ done
 # If no files found, exit
 if [ "$FOUND_ANY" -eq 0 ]; then
     log "❌ No spoofing prop files found"
-    popup "This feature is only for PIF inject"
+    log "This feature is only for PIF inject"
     exit 1
 fi
 
@@ -94,10 +88,10 @@ fi
 
 # Popup status
 if [ "$spoof_status" = "true" ]; then
-    popup "✅ Spoofing enabled"
+    log "✅ Spoofing enabled"
     log "Popup: Spoofing enabled"
 else
-    popup "⚠️ Spoofing disabled"
+    log "⚠️ Spoofing disabled"
     log "Popup: Spoofing disabled"
 fi
 

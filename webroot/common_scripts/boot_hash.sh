@@ -2,14 +2,7 @@
 
 H_FILE="/data/adb/VerifiedBootHash/VerifiedBootHash.txt"
 PROP="ro.boot.vbmeta.digest"
-LOG="/data/adb/Integrity-Box-Logs/hash.log"
-POPUP_FILE="/data/adb/Integrity-Box-Logs/popup.msg"
-
-popup() {
-    mkdir -p "$(dirname "$POPUP_FILE")"
-    echo "$@" > "$POPUP_FILE"
-    chmod 644 "$POPUP_FILE"
-}
+LOG="/data/adb/Box-Brain/Integrity-Box-Logs/hash.log"
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG"
@@ -28,7 +21,7 @@ saved_hash() {
 }
 
 if [ ! -f "$H_FILE" ]; then
-    popup "SusFs is not installed"
+    log "SusFs is not installed"
     exit 1
 fi
 
@@ -45,7 +38,7 @@ case "$1" in
 
     if [ -z "$HASH" ]; then
         log "✦ Invalid hash"
-        popup "Empty hash passed to set"
+        log "Empty hash passed to set"
         exit 1
     fi
 
@@ -55,14 +48,14 @@ case "$1" in
     resetprop -n "$PROP" "$HASH"
 
     log "✦ Saved and set: $HASH"
-    popup "Saved and applied new hash"
+    log "Saved and applied new hash"
     ;;
 
   clear)
 #    rm -f "$H_FILE"
     resetprop -n "$PROP" ""
     log "✦ Hash cleared and property reset"
-    popup "Hash cleared"
+    log "Hash cleared"
     ;;
 
   *)

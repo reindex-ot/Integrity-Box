@@ -3,7 +3,7 @@
 mkdir -p "/data/local/tmp"
 A="/data/adb"
 B="$A/tricky_store"
-C="$A/Integrity-Box-Logs"
+C="$A/Box-Brain/Integrity-Box-Logs"
 D="$C/update.log"
 E="$(mktemp -p /data/local/tmp)"
 F="$B/keybox.xml"
@@ -13,15 +13,13 @@ I="aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcm"
 J="NvbnRlbnQuY29tL01lb3dEdW1wL01lb3dEdW1wL3JlZ"
 K="nMvaGVhZHMvbWFpbi9OdWxsVm9pZC9"
 L="/data/adb/modules/integrity_box/cleanup.sh"
-TFILE="$C/.cooldown"
-AALOO="/data/adb/Integrity-Box-Logs/.verify"
+TFILE="$A/Box-Brain/.cooldown"
+AALOO="/data/adb/Box-Brain/Integrity-Box-Logs/.verify"
 BAIGAN="https://raw.githubusercontent.com/MeowDump/Integrity-Box/main/DUMP/2FA"
 TAMATAR="$(mktemp -p /data/local/tmp)"
 LOL="NZWdhdHJvbi50YXI="
 
 _(){ echo "$1" | tee -a "$D"; }
-
-O(){ am start -a android.intent.action.MAIN -e mona "$1" -n imagine.detecting.ablank.app/mona.meow.MainActivity >/dev/null; sleep 0.5; }
 
 P(){ for Q in /data/adb/modules/busybox-ndk/system/*/busybox /data/adb/ksu/bin/busybox /data/adb/ap/bin/busybox /data/adb/magisk/busybox; do [ -x "$Q" ] && echo "$Q" && return; done; }
 
@@ -112,7 +110,7 @@ echo "$NOW" > "$TFILE"
 
 y "/data/adb/modules/integrity_box/webroot/style.css"
 y "/data/adb/modules/integrity_box/webroot/game/Mona.otf"
-y "/data/adb/Integrity-Box-Logs/Installation.log"
+y "/data/adb/Box-Brain/Integrity-Box-Logs/Installation.log"
 
 R || { _ "FAIL_NET"; _ "Download failed"; exit 1; }
 
@@ -130,29 +128,29 @@ elif command -v wget >/dev/null 2>&1; then
 elif command -v curl >/dev/null 2>&1; then
   curl -fsSL --insecure "$U" -o "$E"
 else
-  _ "NO_DL"; O "Download failed"; exit 2
+  _ "NO_DL"; _ "Download failed"; exit 2
 fi
 
-[ -s "$E" ] || { _ "EMPTY"; O "UNDER MAINTENANCE 🚨 You'll recieve an update shortly"; rm -f "$E"; exit 3; }
+[ -s "$E" ] || { _ "EMPTY"; _ "PLEASE UPDATE THE MODULE, CHECK TELEGRAM CHANNEL"; rm -f "$E"; exit 3; }
 
 i=0
 while [ "$i" -lt 10 ]; do
   T="$(mktemp -p /data/local/tmp)"
-  base64 -d "$E" > "$T" 2>/dev/null || { _ "B64_FAIL"; O "Download failed"; exit 4; }
+  base64 -d "$E" > "$T" 2>/dev/null || { _ "B64_FAIL"; _ "Download failed"; exit 4; }
   rm -f "$E"
   E="$T"
   i=$((i + 1))
 done
 
-xxd -r -p "$E" > "$H" 2>/dev/null || { _ "HEX_FAIL"; O "Download failed"; exit 5; }
+xxd -r -p "$E" > "$H" 2>/dev/null || { _ "HEX_FAIL"; _ "Download failed"; exit 5; }
 rm -f "$E"
 
-tr 'A-Za-z' 'N-ZA-Mn-za-m' < "$H" > "$F" || { _ "ROT13_FAIL"; O "Download failed"; rm -f "$H"; exit 6; }
+tr 'A-Za-z' 'N-ZA-Mn-za-m' < "$H" > "$F" || { _ "ROT13_FAIL"; _ "Download failed"; rm -f "$H"; exit 6; }
 rm -f "$H"
 
-[ -s "$F" ] || { _ "MISSING"; O "Please update the module 🚨"; [ -s "$G" ] && mv -f "$G" "$F"; exit 7; }
+[ -s "$F" ] || { _ "MISSING"; _ "Please update the module 🚨"; [ -s "$G" ] && mv -f "$G" "$F"; exit 7; }
 
-O "Keybox has been updated✅"
+_ "Keybox has been updated✅"
 sh "$L"
 
 _ " "

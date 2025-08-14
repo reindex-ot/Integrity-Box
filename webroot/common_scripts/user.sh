@@ -2,16 +2,11 @@
 TARGET='/data/adb/tricky_store/target.txt'
 TEE_STATUS='/data/adb/tricky_store/tee_status'
 
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
-    sleep 0.5
-}
-
 # Ensure TrickyStore directory exists
 if [ ! -d "/data/adb/tricky_store" ]; then
     echo "- Please install Trickystore Module"
     nohup am start -a android.intent.action.VIEW -d https://github.com/5ec1cff/TrickyStore/releases >/dev/null 2>&1 & 
-    popup "Redirecting to Github"
+    echo "Redirecting to Github"
     exit 1
 fi
 
@@ -61,9 +56,9 @@ echo "----------------------------------------------"
 echo "  All Packages with TEE support"
 echo "----------------------------------------------"
 cat "$TARGET"
-popup "🤩 Updated target.txt"
+echo "🤩 Updated target.txt"
 
-su -c "am force-stop com.google.android.gms.unstable"
-su -c "am force-stop com.android.vending"
+# su -c "am force-stop com.google.android.gms.unstable"
+# su -c "am force-stop com.android.vending"
 
 exit 0

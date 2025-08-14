@@ -1,8 +1,4 @@
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
-    sleep 0.5
-}
-
+#!/system/bin/sh
 # Only set the properties if they already exist
 if getprop persist.sys.pihooks.disable.gms_props >/dev/null 2>&1; then
     su -c setprop persist.sys.pihooks.disable.gms_props true
@@ -17,4 +13,4 @@ su -c 'getprop | grep -Ei "pihook|pixelprops|gms|pi" | sed -E "s/^\[(.*)\]:.*/\1
     resetprop -p -d "$prop"
 done'
 
-popup "Done, Reopen detector to check"
+echo "Done, Reopen detector to check"

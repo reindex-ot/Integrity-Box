@@ -1,9 +1,9 @@
 # log file path and output file path
-L="/data/adb/Integrity-Box-Logs/sus.log"
+L="/data/adb/Box-Brain/Integrity-Box-Logs/sus.log"
 O="/data/adb/susfs4ksu/sus_path.txt"
 
 
-# Function to meow messages
+# Logger
 meow() {
     echo "$1" | tee -a "$L"
 }

@@ -1,16 +1,11 @@
 #!/system/bin/sh
 
-L="/data/adb/Integrity-Box-Logs/prop_detection.log"
+L="/data/adb/Box-Brain/Integrity-Box-Logs/prop_detection.log"
 TIME=$(date "+%Y-%m-%d %H:%M:%S")
 Q="------------------------------------------"
 R="════════════════════════════"
 
 log() { echo -e "$1" | tee -a "$L"; }
-
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
-    sleep 0.5
-}
 
 # Start fresh
 echo -e "$Q" > "$L"
@@ -112,4 +107,4 @@ print_props "Timezone / Locale" \
 # End
 log "- Prop Dump Complete ✅"
 echo -e "$R" >> "$L"
-popup "Log saved to $L"
+log "Log saved to $L"

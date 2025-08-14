@@ -1,13 +1,7 @@
 #!/system/bin/sh
 
 # Log file path
-LOGFILE="/data/adb/Integrity-Box-Logs/selinux.log"
-
-# Popup function using meow.helper
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
-    sleep 0.5
-}
+LOGFILE="/data/adb/Box-Brain/Integrity-Box-Logs/selinux.log"
 
 # Ensure log file exists
 mkdir -p "$(dirname "$LOGFILE")"
@@ -25,16 +19,16 @@ if [ "$CURRENT_MODE" = "Enforcing" ]; then
     echo "[+] SELinux changed from Enforcing to $NEW_MODE" >> "$LOGFILE"
     echo " " >> "$LOGFILE"
     echo "SELinux is now: $NEW_MODE"
-    popup "SELinux set to Permissive 🔓"
+    log "SELinux set to Permissive 🔓"
 elif [ "$CURRENT_MODE" = "Permissive" ]; then
     setenforce 1
     NEW_MODE=$(getenforce)
     echo "[+] SELinux changed from Permissive to $NEW_MODE" >> "$LOGFILE"
     echo " " >> "$LOGFILE"
     echo "SELinux is now: $NEW_MODE"
-    popup "SELinux set to Enforcing 🔐"
+    log "SELinux set to Enforcing 🔐"
 else
     echo "[!] Unknown SELinux state: $CURRENT_MODE" >> "$LOGFILE"
     echo " " >> "$LOGFILE"
-    popup "Unknown SELinux state ❓"
+    log "Unknown SELinux state ❓"
 fi

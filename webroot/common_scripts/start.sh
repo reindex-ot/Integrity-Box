@@ -4,13 +4,8 @@ file="/sdcard/stop"
 shamiko="/data/adb/shamiko/whitelist"
 nohello="/data/adb/nohello/whitelist"
 
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
-    sleep 0.5
-}
-
 # Remove the stop file
-[ -f "$file" ] && rm -f "$file" && popup "✅ Auto Whitelist Mode enabled"
+[ -f "$file" ] && rm -f "$file" && echo "✅ Auto Whitelist Mode enabled"
 
 # Restore Shamiko whitelist if parent dir exists
 [ -d "$(dirname "$shamiko")" ] && [ ! -f "$shamiko" ] && touch "$shamiko"

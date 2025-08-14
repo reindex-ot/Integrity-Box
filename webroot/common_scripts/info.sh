@@ -1,9 +1,4 @@
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
-    sleep 0.5
-}
-
+#!/system/bin/sh
 nohup am start -a android.intent.action.VIEW -d https://github.com/MeowDump/Integrity-Box >/dev/null 2>&1 & 
-popup "Redirecting to Source Code repo"
-
+echo "Redirecting to Source Code repo"
 exit 0

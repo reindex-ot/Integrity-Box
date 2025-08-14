@@ -1,14 +1,9 @@
 #!/system/bin/sh
 
-SOURCE="/data/adb/modules/integrity_box/keybox.xml"
+SOURCE="/data/adb/modules/integrity_box/toolbox/keybox.xml"
 DEST_DIR="/data/adb/tricky_store"
 DEST_FILE="$DEST_DIR/keybox.xml"
 BACKUP_FILE="$DEST_DIR/keybox.xml.md"
-
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
-    sleep 0.5
-}
 
 # Ensure destination directory exists
 mkdir -p "$DEST_DIR"
@@ -21,4 +16,4 @@ fi
 # Copy aosp keybox
 cp -f "$SOURCE" "$DEST_FILE"
 chmod 644 $DEST_FILE
-popup "Switched to AOSP keybox"
+echo "Switched to AOSP keybox"

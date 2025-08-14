@@ -1,7 +1,7 @@
 #!/system/bin/sh
 
 # Paths
-LOG="/data/adb/Integrity-Box-Logs"
+LOG="/data/adb/Box-Brain/Integrity-Box-Logs"
 LOGFILE="$LOG/patch.log"
 TARGET_DIR="/data/adb/tricky_store"
 FILE_PATH="$TARGET_DIR/security_patch.txt"
@@ -18,12 +18,6 @@ mkdir -p "$LOG"
 # Logging function
 log() { echo -e "$1" | tee -a "$LOGFILE"; }
 
-# Popup function
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
-    sleep 0.5
-}
-
 log "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 log " "
 log "Patch Mode : Auto"
@@ -33,7 +27,6 @@ log "Applied on:  $(date '+%A %d/%m/%Y %I:%M:%S %p')"
 # Check if file exists to proceed
 if [ ! -f "$FILE_PATH" ] && [ ! -d "$TARGET_DIR" ]; then
     log "⚠️ Tricky Store is not installed."
-    popup "⚠️ Tricky Store is not installed"
     exit 0
 fi
 
@@ -41,12 +34,10 @@ fi
 if [ -f "$FILE_PATH" ]; then
     rm -f "$FILE_PATH"
     log "Patch Status : ❌ Not Spoofed / Removed"
-    popup "🗑️ Spoof removed!"
 else
     mkdir -p "$TARGET_DIR"
     echo "$FILE_CONTENT" > "$FILE_PATH"
     log "Patch Status : ✅ Spoofed"
-    popup "✅ Spoof applied!"
 fi
 
 log "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

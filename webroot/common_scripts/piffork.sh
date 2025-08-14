@@ -3,13 +3,7 @@
 # Define paths
 PIF_JSON="/data/adb/modules/playintegrityfix/custom.pif.json"
 BACKUP_JSON="${PIF_JSON}.backup" # Switched from .bak to .backup |  PIF now reserves .bak for its own use
-LOG_FILE="/data/adb/Integrity-Box-Logs/spoofing.log"
-
-# Popup function
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
-    sleep 0.5
-}
+LOG_FILE="/data/adb/Box-Brain/Integrity-Box-Logs/spoofing.log"
 
 # Logger function
 log() {
@@ -33,7 +27,6 @@ kill_process() {
 # Exit if config doesn't exist
 if [ ! -f "$PIF_JSON" ]; then
     log "ERROR: $PIF_JSON not found."
-    popup "You're not using PIF Fork"
     exit 1
 fi
 
@@ -41,7 +34,6 @@ fi
 if [ ! -f "$BACKUP_JSON" ]; then
     cp "$PIF_JSON" "$BACKUP_JSON"
     log "Backup created at $BACKUP_JSON"
-#    popup "Backup created"
 fi
 
 # Read current spoofProps value
@@ -51,7 +43,6 @@ if [ "$current_value" = "1" ]; then
     # Restore from backup
     cp "$BACKUP_JSON" "$PIF_JSON"
     log "Spoofing restored from backup"
-    popup "Spoofing disabled"
 else
     # Enable spoofing: set all to 1
     sed -i \
@@ -61,7 +52,6 @@ else
         -e 's/"spoofSignature": *"[01]"/"spoofSignature": "1"/' \
         "$PIF_JSON"
     log "Spoofing enabled: all flags set to 1"
-    popup "Spoofing enabled"
 fi
 
 kill_process "com.google.android.gms.unstable"

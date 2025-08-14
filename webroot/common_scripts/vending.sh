@@ -1,10 +1,5 @@
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
-    sleep 0.5
-}
-
+#!/system/bin/sh
 su -c "pm clear com.android.vending"
 su -c "pm clear com.google.android.gms"
-
-popup " Open playstore & Check/FIX"
+echo " Open playstore & Check/FIX"
 exit 0

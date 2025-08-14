@@ -1,10 +1,4 @@
 #!/system/bin/sh
-
-popup() {
-    am start -a android.intent.action.MAIN -e mona "$@" -n imagine.detecting.ablank.app/mona.meow.MainActivity > /dev/null
-    sleep 0.5
-}
-
 kill_process() {
     TARGET="$1"
     PID=$(pidof "$TARGET")
@@ -24,4 +18,4 @@ kill_process "com.google.android.gms.unstable"
 kill_process "com.google.android.gms"
 kill_process "com.android.vending"
 
-popup "Process killed successfully"
+echo "Process killed successfully"
