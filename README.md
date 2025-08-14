@@ -50,7 +50,7 @@
 
 > Please make sure you have the following **modules installed** before using Integrity Box:
 
-- [**Play Integrity Fork**](https://github.com/osm0sis/PlayIntegrityFork/releases)
+- [**Play Integrity Fork**](https://github.com/osm0sis/PlayIntegrityFork/releases) _or cROM's inbuilt gms spoofing_
 - [**Tricky Store**](https://github.com/5ec1cff/TrickyStore/releases)
 > Make sure to properly hide root & zygisk traces, otherwise you won't be able to pass play integrity verdicts
 
@@ -103,6 +103,43 @@
   </tr>
 </table>
 
+# 📊 Emoji Results Meaning in module's description
+> The main purpose of adding these was to centralize all Play Integrity-related info in one place, so users can spot issues in their setup and fix them on their own, without feeling lost or relying on others. I even saw people on Telegram charging money for this... LOL.
+
+- **SELinux**
+  - `🟢` — Enforcing  
+  - `🔴` — Permissive
+- **Kernel**
+  - `🟢` — Can pass play integrity
+  - `🔴` — [Banned Kernel](https://xdaforums.com/t/module-play-integrity-fix.4607985/page-518#post-89308909) Detected, Can't pass play integrity
+
+- **TEE (Trusted Execution Environment)**
+  - `🟢` — Intact  
+  - `🔴` — Broken
+  - `⚠️` — Unknown
+
+- **ROM Sign**
+  - `🟢` — Release Key
+  - `🔴` — Test Key
+  - `❓` — Unknown
+
+- **Risky**
+  - `This represents the number of risky/flagged apps installed in your device`
+ 
+- **All**
+  - `This represents the number of modules installed in your device`
+
+- **Patch**
+  - `This represents your Android Security Patch`
+    
+- **Pstore**
+  - `This represents your Play Store Version`
+ 
+- **Android**
+  - `This represents your Android Version`
+
+![Description](https://raw.githubusercontent.com/MeowDump/Integrity-Box/refs/heads/main/DUMP/description.png)
+
 <details>
 <summary><strong>Notes</strong></summary>
 
@@ -111,24 +148,5 @@ NOTE: Use Action/WebUI button to report bugs/issues
 
 - Hide root properly if play integrity isn't passing for you. If you are using a custom rom, make sure you have disabled inbuilt gms spoofing. How to disable it? Well it depends on what rom you're using. Join your rom help group & ask `how to disable it` there.  
 - Avoid conflicting or unnecessary modules that expose your root environment
-
-</details>
-
-<details>
-<summary><strong>FAQ</strong></summary>
-
-<br>
-
-> NOTICE: THE POPUP TOASTER WILL BE DISCONTINUED IN v15
-
-## Why the Popup Toaster App Remains After Module Removal
-
-This is because the app was installed using the `pm install <package-name>` command, while module installation, which installs the APK directly onto the system to avoid unexpected crashes due to broken installation.
-
-Magisk’s standard uninstall process does not support removing applications installed this way. That's why it still remains after module removal
-
-## Complete Uninstallation
-
-To fully remove all components, including the Popup Toaster app, you must run the module’s uninstall script `($MODDIR/uninstall.sh)` with `su` manually or simply remove the module from your root manager and uninstall the Popup Toaster app manually.
 
 </details>
