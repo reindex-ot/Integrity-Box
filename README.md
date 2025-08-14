@@ -106,7 +106,7 @@
 # Configuration
 > You can control certain module features by creating specific config file in *`/data/adb/BrainBox`* folder
 - _create `stop` file to disable module toggle feature which switches between blacklist/whitelist modes (magisk only)_
-- _create `skip` file if you're facing camera app crash_
+- _create `cam` file if you're facing camera app crash_
 - _create `stoptarget` to disable target.txt auto update on boot_
 
 # Emoji Results Meaning in module's description
