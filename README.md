@@ -1,5 +1,5 @@
-`I originally wrote this code in Notepad and haven’t been very active on Git. I’m uploading it here mainly to keep things transparent. Feel free to inspect the code.`
-`Happy debugging`
+_I originally wrote this code in Notepad and haven’t been very active on Git. I’m uploading it here mainly to keep things transparent. Feel free to inspect the code._
+_Happy debugging_
 <details>
 <summary><strong>Why I Built This Module</strong></summary>
 
@@ -51,7 +51,7 @@
 > Please make sure you have the following **modules installed** before using Integrity Box:
 
 - [**Play Integrity Fork**](https://github.com/osm0sis/PlayIntegrityFork/releases) _or cROM's inbuilt gms spoofing_
-- [**Tricky Store**](https://github.com/5ec1cff/TrickyStore/releases)
+- [**Tricky Store**](https://github.com/5ec1cff/TrickyStore/releases) or [**Tricky Store OSS**](https://github.com/beakthoven/TrickyStoreOSS/releases)
 > Make sure to properly hide root & zygisk traces, otherwise you won't be able to pass play integrity verdicts
 
 ## Support
