@@ -12,7 +12,7 @@ echo " /_____/\____/_/|_| "
 echo " "
 echo " "
 
-echo " Preparing Auto Mode, Please Wait...."
+echo "Initializing Auto Mode. Please wait..."
 echo " "
 
 SCRIPT_DIR="/data/adb/modules/integrity_box/webroot/common_scripts"
@@ -83,15 +83,29 @@ else
 fi
 
 # Step 2
-start_step 2 "Refreshing fingerprint (osm0sis's module)"
-if run_cmd_capture "sh \"$PIF/autopif2.sh\""; then
-    log_line "  [OK]"
-    PASS_COUNT=`expr $PASS_COUNT + 1`
-    SUMMARY="$SUMMARY\n[OK]    Step 2: Refreshing fingerprint"
+start_step 2 "Refreshing fingerprint"
+if [ -f "$PIF/autopif2.sh" ]; then
+    FP_SCRIPT="$PIF/autopif2.sh"
+elif [ -f "$PIF/autopif.sh" ]; then
+    FP_SCRIPT="$PIF/autopif.sh"
 else
-    log_line "  [FAIL]"
+    FP_SCRIPT=""
+fi
+
+if [ -n "$FP_SCRIPT" ]; then
+    if run_cmd_capture "sh \"$FP_SCRIPT\""; then
+        log_line "  [OK]"
+        PASS_COUNT=`expr $PASS_COUNT + 1`
+        SUMMARY="$SUMMARY\n[OK]    Step 2: Refreshing fingerprint"
+    else
+        log_line "  [FAIL]"
+        FAIL_COUNT=`expr $FAIL_COUNT + 1`
+        SUMMARY="$SUMMARY\n[FAIL]  Step 2: Refreshing fingerprint"
+    fi
+else
+    log_line "  [FAIL] No fingerprint script found"
     FAIL_COUNT=`expr $FAIL_COUNT + 1`
-    SUMMARY="$SUMMARY\n[FAIL]  Step 2: Refreshing fingerprint"
+    SUMMARY="$SUMMARY\n[FAIL]  Step 2: No fingerprint script found"
 fi
 
 # Step 3

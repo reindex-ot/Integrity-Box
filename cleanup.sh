@@ -25,25 +25,24 @@ touch "$L"
     echo "••••••• Cleanup Started •••••••"
 
 # Remove banner for Magisk users
-if [ -f /data/adb/magisk/magisk ]; then
-    log "Magisk detected."
+#if [ -f /data/adb/magisk/magisk ]; then
+#    log "Magisk detected."
 
-    if [ -d "$MODDIR" ]; then
-        rm -f "$MODDIR/meow"
-        log "Removed meow banner from $MODDIR"
-    else
-        log "Skipped $MODDIR (ran in installed state)"
-    fi
+#    if [ -d "$MODDIR" ]; then
+#        rm -f "$MODDIR/meow"
+#        log "Removed meow banner from $MODDIR"
+#    else
+#        log "Skipped $MODDIR (ran in installed state)"
+#    fi
 
-    if [ -d "$MODDIR2" ]; then
-        rm -f "$MODDIR2/meow"
-        log "Removed meow banner from $MODDIR2"
-    else
-        log "Skipped $MODDIR2 (folder not found)"
-    fi
-else
-    log "Magisk not detected. Skipping banner removal."
-fi
+#    if [ -d "$MODDIR2" ]; then
+#        rm -f "$MODDIR2/meow"
+#    else
+#        log "Skipped $MODDIR2 (folder not found)"
+#    fi
+#else
+#    log "Magisk not detected. Skipping banner removal."
+#fi
 
 # Remove meow helper
 if pm list packages | grep -q "meow.helper"; then
@@ -63,7 +62,7 @@ fi
     if [ ! -f "$F" ]; then
         log "File not found: $F"
         echo "••••••• Cleanup Aborted •••••••"
-        exit 1
+        exit 0
     fi
 
     log "Removing leftover files"
@@ -106,6 +105,7 @@ mv "$T" "$F"
 	delete_if_exist /data/adb/modules/integrity_box/system/product/app/Toaster/Toaster.apk
 	delete_if_exist /data/adb/modules_update/integrity_box/verify.sh
 	delete_if_exist /data/adb/Integrity-Box-Logs
+	delete_if_exist /data/adb/service.d/debug.sh
 
     echo "••••••• Cleanup Ended •••••••"
     echo ""

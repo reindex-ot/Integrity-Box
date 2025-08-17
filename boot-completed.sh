@@ -11,6 +11,9 @@ TRICKY_STORE="$MODULE/tricky_store"
 SUSFS="$MODULE/susfs4ksu"
 USER_SCRIPT=/data/adb/modules/integrity_box/webroot/common_scripts/user.sh
 
+resetprop -p --delete persist.log.tag.LSPosed
+resetprop -p --delete persist.log.tag.LSPosed-Bridge
+
 # Lists for sorted display
 ENABLED_LIST=""
 DISABLED_LIST=""
@@ -110,7 +113,7 @@ if [ -f "$TEE_FILE" ]; then
         *)     TEE_STATUS="🟡" ;;
     esac
 else
-    TEE_STATUS="🟡"
+    TEE_STATUS="⚠️"
 fi
 
 # ROM signature check
@@ -122,13 +125,13 @@ if [ -f /system/etc/security/otacerts.zip ]; then
         *)         ROM_SIGN_STATUS="🟡" ;;
     esac
 else
-    ROM_SIGN_STATUS="❓"
+    ROM_SIGN_STATUS="🟡"
 fi
 
 # Final description with new counts
 ALL_MODULES="$ENABLED_LIST"
 [ -n "$DISABLED_LIST" ] && ALL_MODULES="$ALL_MODULES | $DISABLED_LIST"
-description="description=𝗮𝘀𝘀𝗶𝘀𝘁 𝗺𝗼𝗱𝗲: $ALL_MODULES  | 𝗞𝗲𝗿𝗻𝗲𝗹: $KERNEL_STATUS | 𝗥𝗢𝗠 𝗦𝗶𝗴𝗻: $ROM_SIGN_STATUS | 𝗦𝗘.𝗟𝗶𝗻𝘂𝘅: $SELINUX | 𝗧𝗘𝗘: $TEE_STATUS | 𝗔𝗻𝗱𝗿𝗼𝗶𝗱: $ANDROID_VERSION | 𝗗𝗲𝘃𝗶𝗰𝗲: $DEVICE_MODEL | 𝗣𝗮𝘁𝗰𝗵: $PATCH | 𝗣𝘀𝘁𝗼𝗿𝗲: $PSTORE_VER | 𝗥𝗶𝘀𝗸𝘆: $RISKY_COUNT | 𝗔𝗹𝗹: $ALL_COUNT"
+description="description=𝗮𝘀𝘀𝗶𝘀𝘁 𝗺𝗼𝗱𝗲: $ALL_MODULES  | 𝗞𝗲𝗿𝗻𝗲𝗹: $KERNEL_STATUS | 𝗥𝗢𝗠 𝗦𝗶𝗴𝗻: $ROM_SIGN_STATUS | 𝗦𝗘.𝗟𝗶𝗻𝘂𝘅: $SELINUX | 𝗧𝗘𝗘: $TEE_STATUS | 𝗣𝘀𝘁𝗼𝗿𝗲: $PSTORE_VER | 𝗔𝗹𝗹: $ALL_COUNT | 𝗥𝗶𝘀𝗸𝘆: $RISKY_COUNT | 𝗔𝗻𝗱𝗿𝗼𝗶𝗱: $ANDROID_VERSION | 𝗗𝗲𝘃𝗶𝗰𝗲: $DEVICE_MODEL | 𝗣𝗮𝘁𝗰𝗵: $PATCH"
 
 # Update module.prop
 sed -i "s/^description=.*/$description/" "$MODDIR/module.prop"

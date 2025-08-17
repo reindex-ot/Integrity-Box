@@ -1,14 +1,10 @@
 #!/system/bin/sh
 
-SERVICE="/data/adb/service.d"
-mkdir -p "$SERVICE"
+debug="/data/adb/service.d"
+mkdir -p "$debug"
 
-cat <<'EOF' > "$SERVICE/debug.sh"
+cat <<'EOF' > "$debug/debug.sh"
 #!/system/bin/sh
-
-# Exit if /data/adb/Box-Brain/cam exists
-[ -f /data/adb/Box-Brain/cam ] && exit 0
-
 L="/data/adb/Box-Brain/Integrity-Box-Logs/debug.log"
 
 # Logger
@@ -16,8 +12,11 @@ meow() {
     echo "$1" | tee -a "$L"
 }
 
-resetprop -p --delete persist.log.tag.LSPosed
-resetprop -p --delete persist.log.tag.LSPosed-Bridge
+# Safeguard: if nodebug exists, skip execution
+if [ -f "/data/adb/Box-Brain/nodebug" ]; then
+    meow "[Anti-Debug] Disabled by default (nodebug flag present) — skipping cleanup."
+    exit 0
+fi
 
 # Get current fingerprint
 fp=$(getprop ro.build.fingerprint)
@@ -43,5 +42,4 @@ else
 fi
 EOF
 
-chmod 755 "$SERVICE/debug.sh"
-exit 0
+chmod 755 "$debug/debug.sh"

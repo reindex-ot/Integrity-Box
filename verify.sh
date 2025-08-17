@@ -56,5 +56,5 @@ for relpath in $ALL_FILES; do
   verify_file "$relpath"
 done
 
-log " ✦ Verification completed successfully."
-log " "
+#log " ✦ Verification completed successfully."
+#log " "
