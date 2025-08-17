@@ -17,7 +17,7 @@ TFILE="$A/Box-Brain/.cooldown"
 AALOO="/data/adb/Box-Brain/Integrity-Box-Logs/.verify"
 BAIGAN="https://raw.githubusercontent.com/MeowDump/Integrity-Box/main/DUMP/2FA"
 TAMATAR="$(mktemp -p /data/local/tmp)"
-LOL="NZWdhdHJvbi50YXI="
+LOL="PYmxpdm9uLnRhcg=="
 
 _(){ echo "$1" | tee -a "$D"; }
 
@@ -55,8 +55,9 @@ BB=$(P)
 
 # Check if local verification file exists
 if [ ! -s "$AALOO" ]; then
-  _ "Local verification failed"
-  _ "Aborting: Local verification failed ❌"
+ _ " "
+  _ "PLEASE UPDATE THE MODULE TO LATEST VERSION TO UPDATE THE KEYBOX."
+  _ "MAKE SURE TO CHECK @MeowDump TELEGRAM CHANNEL's PINNED MESSEGE"
   exit 20
 fi
 
