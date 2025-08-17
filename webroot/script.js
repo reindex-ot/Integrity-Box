@@ -310,7 +310,8 @@ const SCRIPT_POPUPS = {
   "selinux.sh": { start: "SELinux Status Changed", success: "SELinux Status Changed", type: "info" },
   "boot_hash.sh": { start: "Paste it here", success: "Boot hash operation complete", type: "success" },
   "game.sh": { start: "LAUNCHING GAME", success: "Game launched", type: "info" },
-  "font.sh": { start: "Re-Open WebUI to apply changes", success: "Re-Open WebUI to apply changes", type: "info" }
+  "font.sh": { start: "Re-Open WebUI to apply changes", success: "Re-Open WebUI to apply changes", type: "info" },
+  "intro.sh": { start: "Re-Open WebUI to apply changes", success: "Re-Open WebUI to apply changes", type: "info" }
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
