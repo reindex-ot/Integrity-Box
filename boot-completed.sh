@@ -9,7 +9,7 @@ SHAMIKO="$MODULE/zygisk_shamiko"
 NOHELLO="$MODULE/zygisk_nohello"
 TRICKY_STORE="$MODULE/tricky_store"
 SUSFS="$MODULE/susfs4ksu"
-USER_SCRIPT=/data/adb/modules/integrity_box/webroot/common_scripts/user.sh
+USER_SCRIPT="$MODDIR/webroot/common_scripts/user.sh"
 
 resetprop -p --delete persist.log.tag.LSPosed
 resetprop -p --delete persist.log.tag.LSPosed-Bridge

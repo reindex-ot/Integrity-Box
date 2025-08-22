@@ -470,13 +470,13 @@ batman() {
 
   pikachu " "
   pikachu " ✦ Updating target list as per your TEE status"
-  chmod +x "$UPDATE/user.sh"
+  chmod +x "$UPDATE/webroot/common_scripts/user.sh"
   sh "$UPDATE/webroot/common_scripts/user.sh" >/dev/null 2>&1
   pikachu " ✦ Target list has been updated "
 
-  chmod +x "$UPDATE/webroot/common_scripts/patch.sh"
-  sh "$UPDATE/webroot/common_scripts/patch.sh" >/dev/null 2>&1
-  pikachu " ✦ TrickyStore spoof applied "
+#  chmod +x "$UPDATE/webroot/common_scripts/patch.sh"
+#  sh "$UPDATE/webroot/common_scripts/patch.sh" >/dev/null 2>&1
+#  pikachu " ✦ TrickyStore spoof applied "
 }
 
 # Entry point
@@ -484,7 +484,7 @@ batman
 pikachu " "
 
 # Grab logs for debugging 
-superman >/dev/null 2>&1
+###superman >/dev/null 2>&1
 
 # Delete old logs & trash generated integrity box
 chmod +x "$UPDATE/cleanup.sh"
@@ -497,7 +497,7 @@ cat <<EOF > /data/adb/Box-Brain/Integrity-Box-Logs/.verify
 STARTsmallTHINKbigMOVEfast
 EOF
 
-am force-stop com.android.vending; am force-stop com.google.android.gms
+###am force-stop com.android.vending; am force-stop com.google.android.gms
 
 release_source
 pikachu " "

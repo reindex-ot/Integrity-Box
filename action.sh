@@ -1,85 +1,100 @@
 #!/system/bin/sh
-echo "     ____      __                  _ __       "
-echo "    /  _/___  / /____  ____ ______(_) /___  __"
-echo "    / // __ \/ __/ _ \/ __ / ___/ / __/ / /  / "
-echo "  _/ // / / / /_/  __/ /_/ / /  / / /_/ /_/ / "
-echo " /___/_/_/_/\__/\___/\__, /_/  /_/\__/\__, /  "
-echo "      ___           ____/            ____/   "
-echo "    / __ )____  _     "
-echo "   / __  / __ \| |/_/ "
-echo "  / /_/ / /_/ />  < "
-echo " /_____/\____/_/|_| "
-echo " "
-echo " "
+echo " ";
+echo "888 88b,   e88 88e   Y8b Y8P";
+echo "888 88P'  d888 888b   Y8b Y ";
+echo "888 8K   C8888 8888D   Y8b  ";
+echo "888 88b,  Y888 888P   e Y8b ";
+echo "888 88P     88 88    d8b Y8b";
+echo " ";
+echo "•••••••••••••••••••••••••••••••"
 
-echo "Initializing Auto Mode. Please wait..."
-echo " "
+# Network check
+megatron() {
+  local hosts="8.8.8.8 1.1.1.1 8.8.4.4"
+  local max_attempts=5
+  local attempt=1
 
-SCRIPT_DIR="/data/adb/modules/integrity_box/webroot/common_scripts"
+  while [ "$attempt" -le "$max_attempts" ]; do
+    echo "Internet check Attempt $attempt of $max_attempts ..."
+    
+    # ping host
+    for h in $hosts; do
+      if ping -c 1 -W 5 "$h" >/dev/null 2>&1; then
+        return 0
+      fi
+    done
+
+    # Try HTTP 204 fallback
+    if command -v curl >/dev/null 2>&1; then
+      if curl -s --max-time 5 http://clients3.google.com/generate_204 >/dev/null 2>&1; then
+        return 0
+      fi
+    fi
+
+    attempt=$((attempt + 1))
+    sleep 3
+  done
+
+  echo "Poor/No internet connection after $max_attempts attempts."
+  return 1
+}
+
+echo " "
+if ! megatron; then
+    exit 1
+fi
+
+OK="   ✓ OK"
+FAIL="   ✗ FAIL"
+
+MODDIR="/data/adb/modules/integrity_box"
+SCRIPT_DIR="$MODDIR/webroot/common_scripts"
 PIF="/data/adb/modules/playintegrityfix"
-TARGET="/data/adb/modules/integrity_box/boot-completed.sh"
+TARGET="$MODDIR/boot-completed.sh"
 KILL="$SCRIPT_DIR/kill.sh"
 UPDATE="$SCRIPT_DIR/key.sh"
-LOG="/data/adb/Box-Brain/Integrity-Box-Logs/action.log"
 
 TOTAL_STEPS=5
 PASS_COUNT=0
 FAIL_COUNT=0
-SUMMARY=""
 
-# logger
-log_line() {
-    printf "%s\n" "$1" | tee -a "$LOG"
-}
+# Randomize banner
+RANDOM_NUM=$(( (RANDOM % 13) + 1 ))
+sed -i "s|^banner=.*|banner=https://raw.githubusercontent.com/MeowDump/MeowDump/refs/heads/main/Banner/mona$RANDOM_NUM.png|" "$MODDIR/module.prop"
 
 # print step header
 start_step() {
-    log_line ""
-    log_line "----------------------------------------"
-    log_line "[$1/${TOTAL_STEPS}] $2"
-    log_line "----------------------------------------"
+    echo ""
+    echo "[$1/${TOTAL_STEPS}] $2"
 }
 
-# run a command (passed as single string), capture output and exit code
-run_cmd_capture() {
-    CMD_STR="$1"
-    TMP_OUT="/data/local/tmp/integrity_box_action.$$"
-    # run the command, capture stdout+stderr to TMP_OUT
-    sh -c "$CMD_STR" >"$TMP_OUT" 2>&1
-    RC=$?
-    # stream output lines to log
-    if [ -f "$TMP_OUT" ]; then
-        while IFS= read -r line; do
-            [ -n "$line" ] && log_line "    → $line"
-        done < "$TMP_OUT"
-        rm -f "$TMP_OUT"
-    fi
-    return $RC
-}
-
-# safe delay handler
+# delay handler
 handle_delay() {
     if [ -z "$MMRL" ]; then
         if [ "$KSU" = "true" ] || [ "$APATCH" = "true" ]; then
             if [ "$KSU_NEXT" != "true" ]; then
                 log_line "Closing dialog in 10 seconds..."
-                sleep 5
+                sleep 10
             fi
         fi
     fi
 }
 
+# run command silently, only return exit code
+run_cmd_capture() {
+    CMD_STR="$1"
+    sh -c "$CMD_STR" >/dev/null 2>&1
+    return $?
+}
+
 # Step 1
 start_step 1 "Updating Tricky Store packages"
-#log_line "  - Updating target list as per your TEE status"
 if run_cmd_capture "sh \"$TARGET\""; then
-    log_line "  [OK]"
-    PASS_COUNT=`expr $PASS_COUNT + 1`
-    SUMMARY="$SUMMARY\n[OK]    Step 1: Updating Tricky Store packages"
+    echo "   $OK"
+    PASS_COUNT=$((PASS_COUNT + 1))
 else
-    log_line "  [FAIL]"
-    FAIL_COUNT=`expr $FAIL_COUNT + 1`
-    SUMMARY="$SUMMARY\n[FAIL]  Step 1: Updating Tricky Store packages"
+    echo "   $FAIL"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
 fi
 
 # Step 2
@@ -94,69 +109,55 @@ fi
 
 if [ -n "$FP_SCRIPT" ]; then
     if run_cmd_capture "sh \"$FP_SCRIPT\""; then
-        log_line "  [OK]"
-        PASS_COUNT=`expr $PASS_COUNT + 1`
-        SUMMARY="$SUMMARY\n[OK]    Step 2: Refreshing fingerprint"
+        echo "   $OK"
+        PASS_COUNT=$((PASS_COUNT + 1))
     else
-        log_line "  [FAIL]"
-        FAIL_COUNT=`expr $FAIL_COUNT + 1`
-        SUMMARY="$SUMMARY\n[FAIL]  Step 2: Refreshing fingerprint"
+        echo "   $FAIL"
+        FAIL_COUNT=$((FAIL_COUNT + 1))
     fi
 else
-    log_line "  [FAIL] No fingerprint script found"
-    FAIL_COUNT=`expr $FAIL_COUNT + 1`
-    SUMMARY="$SUMMARY\n[FAIL]  Step 2: No fingerprint script found"
+    echo "   $FAIL (UNKNOWN PIF DETECTED)"
+    echo "   Please use PIF Fork by @osm0sis"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
 fi
 
 # Step 3
 start_step 3 "Applying Advanced settings to PIF"
 if run_cmd_capture "sh \"$PIF/migrate.sh\" -a -f"; then
-    log_line "  [OK]"
-    PASS_COUNT=`expr $PASS_COUNT + 1`
-    SUMMARY="$SUMMARY\n[OK]    Step 3: Applying Advanced settings"
+    echo "   $OK"
+    PASS_COUNT=$((PASS_COUNT + 1))
 else
-    log_line "  [FAIL]"
-    FAIL_COUNT=`expr $FAIL_COUNT + 1`
-    SUMMARY="$SUMMARY\n[FAIL]  Step 3: Applying Advanced settings"
+    echo "   $FAIL"
+    echo "   Why don't you use PIF Fork by @osm0sis?"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
 fi
 
 # Step 4
 start_step 4 "Updating Keybox"
-if run_cmd_capture "sh \"$UPDATE\""; then
-    log_line "  [OK]"
-    PASS_COUNT=`expr $PASS_COUNT + 1`
-    SUMMARY="$SUMMARY\n[OK]    Step 4: Updating Keybox"
+if sh "$UPDATE"; then
+    echo "   $OK"
+    PASS_COUNT=$((PASS_COUNT + 1))
 else
-    log_line "  [FAIL]"
-    FAIL_COUNT=`expr $FAIL_COUNT + 1`
-    SUMMARY="$SUMMARY\n[FAIL]  Step 4: Keybox Update"
+    echo "   $FAIL"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
 fi
 
 # Step 5
 start_step 5 "Restarting GMS process"
-log_line "  - Killing and restarting GMS process"
 if run_cmd_capture "sh \"$KILL\""; then
-    log_line "  [OK]"
-    PASS_COUNT=`expr $PASS_COUNT + 1`
-    SUMMARY="$SUMMARY\n[OK]    Step 5: Restarting GMS"
+    echo "   $OK"
+    PASS_COUNT=$((PASS_COUNT + 1))
 else
-    log_line "  [FAIL]"
-    FAIL_COUNT=`expr $FAIL_COUNT + 1`
-    SUMMARY="$SUMMARY\n[FAIL]  Step 5: Restarting GMS"
+    echo "   $FAIL"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
 fi
 
-# Final summary 
-log_line ""
-log_line "========================================"
-log_line "               SUMMARY                  "
-log_line "========================================"
-# print the collected summary lines
-printf "%b\n" "$SUMMARY" | tee -a "$LOG"
-log_line "----------------------------------------"
-log_line "Passed: $PASS_COUNT"
-log_line "Failed: $FAIL_COUNT"
-log_line "Total:  $TOTAL_STEPS"
-log_line "========================================"
-
+# Final summary
+echo ""
+echo "============ SUMMARY ============"
+echo "✓ Passed: $PASS_COUNT"
+echo "✗ Failed: $FAIL_COUNT"
+echo "  Total: $TOTAL_STEPS"
+echo "================================="
 handle_delay
 exit 0
