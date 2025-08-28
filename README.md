@@ -74,10 +74,19 @@ _Happy debugging_
 
 ## Preview
 <p align="center">
-  <img 
-    src="https://m3-markdown-badges.vercel.app/stars/7/1/MeowDump/Integrity-Box" 
-    alt="GitHub Stars" 
-  />
+  <a href="https://github.com/MeowDump/Integrity-Box/stargazers">
+    <img 
+      src="https://m3-markdown-badges.vercel.app/stars/7/1/MeowDump/Integrity-Box" 
+      alt="GitHub Stars" 
+    />
+  </a>
+  <br />
+  <a href="https://github.com/MeowDump/Integrity-Box/releases">
+    <img 
+      src="https://img.shields.io/github/downloads/MeowDump/Integrity-Box/total?label=Downloads%20%28excluding%20telegram%20release%29&color=%23ff1493&style=flat" 
+      alt="GitHub Releases" 
+    />
+  </a>
 </p>
 
 <table align="center">
