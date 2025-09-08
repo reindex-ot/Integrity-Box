@@ -38,7 +38,7 @@ export const translations = {
     "モジュール情報",
     "WebUI をリサイズ",
     "モーダルを自動で閉じるを切り替え",
-    "Play Game"
+    "ゲームを遊ぶ"
   ]
 };
 
@@ -52,7 +52,7 @@ export const buttonGroups = {
   "Check": { "ja": "Diagnostic" },
   "Help": { "ja": "コミュニティとサポート" },
   "Basic": { "ja": "基本" },
-  "TimePass": { "ja": "Game" }
+  "TimePass": { "ja": "ゲーム" }
 };
 
 // [SECTION 3] There's nothing to translate in this section
