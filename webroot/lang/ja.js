@@ -49,7 +49,7 @@ export const buttonGroups = {
   "TS": { "ja": "Tricky Store" },
   "Sus": { "ja": "SusFS" },
   "CrSpoof": { "ja": "カスタム ROM の偽装" },
-  "Check": { "ja": "Diagnostic" },
+  "Check": { "ja": "診断" },
   "Help": { "ja": "コミュニティとサポート" },
   "Basic": { "ja": "基本" },
   "TimePass": { "ja": "ゲーム" }
