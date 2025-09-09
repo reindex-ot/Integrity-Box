@@ -1,14 +1,14 @@
 // Language: Japanese
 // Translated by: Re*Index.(ot_inc) @reindex-ot
 
-// [セクション 1] テキストの翻訳 " "
+// [SECTION 1] Translate the text inside " "
 export const translations = {
   "ja": [
     "ホワイトリストモードを無効化",
     "ホワイトリストモードを有効化",
     "カスタム PIF フィンガープリントを設定",
-    "PIF インジェクションの値を偽装/偽装を解除",
-    "PIF Fork の値を偽装/偽装を解除",
+    "PIF インジェクションの値を偽装 / 偽装を解除",
+    "PIF Fork の値を偽装 / 偽装を解除",
     "GMS のプロセスを強制停止",
     "デバイスが認定されていませんを修正",
     "Keybox を更新",
@@ -35,14 +35,16 @@ export const translations = {
     "ソースコード",
     "Issue/Bug で報告",
     "SELinux ステータスを切り替え",
-    "モジュール情報",
+    "モジュールの情報",
     "WebUI をリサイズ",
     "モーダルを自動で閉じるを切り替え",
     "ゲームで遊ぶ"
+    "WebUI イントロの有効化 / 無効化",
+    "エクストラ WebUI 機能を表示 / 非表示"
   ]
 };
 
-// [セクション 2] 中のテキストを翻訳 { }
+// [SECTION 2] Translate the text inside { }
 export const buttonGroups = {
   "Whitelist": { "ja": "ホワイトリスト" },
   "PIF": { "ja": "Play Integrity Fix" },
@@ -53,9 +55,10 @@ export const buttonGroups = {
   "Help": { "ja": "コミュニティとサポート" },
   "Basic": { "ja": "基本" },
   "TimePass": { "ja": "ゲーム" }
+  "Extra": { "ja": "エクストラ" }
 };
 
-// [セクション 3] このセクションには翻訳するものはありません
+// [SECTION 3] There's nothing to translate in this section
 export const buttonOrder = [
   "stop.sh", "start.sh", 
   "pif.sh", "spoof.sh", "piffork.sh", "kill.sh", "vending.sh",  "key.sh",
@@ -65,5 +68,6 @@ export const buttonOrder = [
   "abnormal.sh", "app.sh", "prop.sh",
   "support", "meowdump.sh", "meowverse.sh", "info.sh", "report.sh",
   "selinux.sh", "module_info.sh", "resize.sh", "modal.sh",
-  "game.sh"
+  "game.sh",
+  "intro.sh", "webui.sh"
 ];
