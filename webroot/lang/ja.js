@@ -55,7 +55,7 @@ export const buttonGroups = {
   "TimePass": { "ja": "ゲーム" }
 };
 
-// [セクション 3] このアクションは翻訳するものはありません
+// [セクション 3] このセクションには翻訳するものはありません
 export const buttonOrder = [
   "stop.sh", "start.sh", 
   "pif.sh", "spoof.sh", "piffork.sh", "kill.sh", "vending.sh",  "key.sh",
