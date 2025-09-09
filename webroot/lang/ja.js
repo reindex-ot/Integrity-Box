@@ -38,7 +38,7 @@ export const translations = {
     "モジュールの情報",
     "WebUI をリサイズ",
     "モーダルを自動で閉じるを切り替え",
-    "ゲームで遊ぶ"
+    "ゲームで遊ぶ",
     "WebUI イントロの有効化 / 無効化",
     "エクストラ WebUI 機能を表示 / 非表示"
   ]
@@ -54,7 +54,7 @@ export const buttonGroups = {
   "Check": { "ja": "診断" },
   "Help": { "ja": "コミュニティとサポート" },
   "Basic": { "ja": "基本" },
-  "TimePass": { "ja": "ゲーム" }
+  "TimePass": { "ja": "ゲーム" },
   "Extra": { "ja": "エクストラ" }
 };
 
