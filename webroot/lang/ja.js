@@ -15,7 +15,7 @@ export const translations = {
     "すべてのアプリをターゲットリストに追加",
     "ユーザーアプリのみをターゲットリストに追加",
     "デフォルトの Keybox に切り替え",
-    "オープンソース Keybox に切り替え",
+    "オープンソースの Keybox に切り替え",
     "Tricky Store パッチの偽装",
     "BAN 済みの Keybox リストを取得",
     "SusFS 構成を更新",
