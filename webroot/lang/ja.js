@@ -1,7 +1,7 @@
 // Language: Japanese
 // Translated by: Re*Index.(ot_inc) @reindex-ot
 
-// [SECTION 1] Translate the text inside " "
+// [セクション 1] テキストの翻訳 " "
 export const translations = {
   "ja": [
     "ホワイトリストモードを無効化",
@@ -42,7 +42,7 @@ export const translations = {
   ]
 };
 
-// [SECTION 2] Translate the text inside { }
+// [セクション 2] 中のテキストを翻訳 { }
 export const buttonGroups = {
   "Whitelist": { "ja": "ホワイトリスト" },
   "PIF": { "ja": "Play Integrity Fix" },
@@ -55,7 +55,7 @@ export const buttonGroups = {
   "TimePass": { "ja": "ゲーム" }
 };
 
-// [SECTION 3] There's nothing to translate in this section
+// [セクション 3] このアクションは翻訳するものはありません
 export const buttonOrder = [
   "stop.sh", "start.sh", 
   "pif.sh", "spoof.sh", "piffork.sh", "kill.sh", "vending.sh",  "key.sh",
