@@ -19,7 +19,7 @@ export const translations = {
     "Tricky Store パッチの偽装",
     "BAN 済みの Keybox リストを取得",
     "SusFS 構成を更新",
-    "認証済みブートハッシュを設定",
+    "確認付きブートハッシュを設定",
     "内蔵の GMS 偽装を有効化",
     "Hide Spoofing Props の検出",
     "PixelOS の偽装",
